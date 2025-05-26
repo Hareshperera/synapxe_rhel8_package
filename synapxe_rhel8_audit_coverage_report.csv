@@ -1,0 +1,364 @@
+"Setting Applicability 
+(refer to compliance section under Cover tab)",Category,CIS Section Header,CIS #,"CIS Setting Title
+(for reference only)",Synapxe Setting Title,Synapxe Remediation Steps,Synapxe Verification Procedure,"Synapxe Exceptions
+(Default exceptions to refer to CIS Benchmark)",Change Description / Remarks,"Manual Check 
+(Y/N)?",Covered in Script,Notes
+New,ADOPT,Configure Filesystem Kernel Modules,1.1.1.1,Ensure cramfs kernel module is not available,Ensure cramfs kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Filesystem Kernel Modules,1.1.1.2,Ensure freevxfs kernel module is not available,Ensure freevxfs kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Filesystem Kernel Modules,1.1.1.3,Ensure hfs kernel module is not available,Ensure hfs kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Filesystem Kernel Modules,1.1.1.4,Ensure hfsplus kernel module is not available,Ensure hfsplus kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Filesystem Kernel Modules,1.1.1.5,Ensure jffs2 kernel module is not available,Ensure jffs2 kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Filesystem Kernel Modules,1.1.1.6,Ensure squashfs kernel module is not available,Ensure squashfs kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Filesystem Kernel Modules,1.1.1.7,Ensure udf kernel module is not available,Ensure udf kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Filesystem Kernel Modules,1.1.1.8,Ensure usb-storage kernel module is not available,Ensure usb-storage kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.1.1,Ensure /tmp is a separate partition,Ensure /tmp is a separate partition,Adopt CIS.,Adopt CIS.,"Logical Volume (LVM) is accepted as source for /tmp. 
+
+If Logical Volume (LVM) is used instead of tmpfs, output for SOURCE and FSTYPE should reflect the corresponding values of the LVM.",Update to Exception notes.,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.1.2,Ensure nodev option set on /tmp partition,Ensure nodev option set on /tmp partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.1.3,Ensure nosuid option set on /tmp partition,Ensure nosuid option set on /tmp partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.1.4,Ensure noexec option set on /tmp partition,Ensure noexec option set on /tmp partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Filesystem Partitions,1.1.2.2.1,Ensure /dev/shm is a separate partition,Ensure /dev/shm is a separate partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.2.2,Ensure nodev option set on /dev/shm partition,Ensure nodev option set on /dev/shm partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.2.3,Ensure nosuid option set on /dev/shm partition,Ensure nosuid option set on /dev/shm partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.2.4,Ensure noexec option set on /dev/shm partition,Ensure noexec option set on /dev/shm partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.3.1,Ensure separate partition exists for /home,Ensure separate partition exists for /home,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.3.2,Ensure nodev option set on /home partition,Ensure nodev option set on /home partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.3.3,Ensure nosuid option set on /home partition,Ensure nosuid option set on /home partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.4.1,Ensure separate partition exists for /var,Ensure separate partition exists for /var,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.4.2,Ensure nodev option set on /var partition,Ensure nodev option set on /var partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.4.3,Ensure nosuid option set on /var partition,Ensure nosuid option set on /var partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.5.1,Ensure separate partition exists for /var/tmp,Ensure separate partition exists for /var/tmp,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.5.2,Ensure nodev option set on /var/tmp partition,Ensure nodev option set on /var/tmp partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.5.3,Ensure nosuid option set on /var/tmp partition,Ensure nosuid option set on /var/tmp partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.5.4,Ensure noexec option set on /var/tmp partition,Ensure noexec option set on /var/tmp partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.6.1,Ensure separate partition exists for /var/log,Ensure separate partition exists for /var/log,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.6.2,Ensure nodev option set on /var/log partition,Ensure nodev option set on /var/log partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.6.3,Ensure nosuid option set on /var/log partition,Ensure nosuid option set on /var/log partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.6.4,Ensure noexec option set on /var/log partition,Ensure noexec option set on /var/log partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.7.1,Ensure separate partition exists for /var/log/audit,Ensure separate partition exists for /var/log/audit,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.7.2,Ensure nodev option set on /var/log/audit partition,Ensure nodev option set on /var/log/audit partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.7.3,Ensure nosuid option set on /var/log/audit partition,Ensure nosuid option set on /var/log/audit partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Filesystem Partitions,1.1.2.7.4,Ensure noexec option set on /var/log/audit partition,Ensure noexec option set on /var/log/audit partition,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Software and Patch Management,1.2.2,Ensure gpgcheck is globally activated,Ensure gpgcheck is globally activated,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Secure Boot Settings,1.3.2,Ensure permissions on bootloader config are configured,Ensure permissions on bootloader config are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Additional Process Hardening,1.4.1,Ensure address space layout randomization (ASLR) is enabled,Ensure address space layout randomization (ASLR) is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Additional Process Hardening,1.4.2,Ensure ptrace_scope is restricted,Ensure ptrace_scope is restricted,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Additional Process Hardening,1.4.3,Ensure core dump backtraces are disabled,Ensure core dump backtraces are disabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Additional Process Hardening,1.4.4,Ensure core dump storage is disabled,Ensure core dump storage is disabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SELinux,1.5.1.1,Ensure SELinux is installed,Ensure SELinux is installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SELinux,1.5.1.2,Ensure SELinux is not disabled in bootloader configuration,SELinux is not disabled in bootloader configuration,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SELinux,1.5.1.3,Ensure SELinux policy is configured,Ensure SELinux policy is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SELinux,1.5.1.4,Ensure the SELinux mode is not disabled,Ensure the SELinux mode is not disabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SELinux,1.5.1.5,Ensure the SELinux mode is enforcing,Ensure the SELinux state is enforcing,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SELinux,1.5.1.6,Ensure no unconfined services exist,Ensure no unconfined services exist,Adopt CIS.,Adopt CIS.,"The following services are exempted from this setting, as they are known to deviate by design:
+",NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SELinux,1.5.1.7,Ensure the MCS Translation Service (mcstrans) is not installed,Ensure the MCS Translation Service (mcstrans) is not installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SELinux,1.5.1.8,Ensure SETroubleshoot is not installed,Ensure SETroubleshoot is not installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure system wide crypto policy,1.6.1,Ensure system wide crypto policy is not set to legacy,Ensure system wide crypto policy is not set to legacy,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure system wide crypto policy,1.6.2,Ensure system wide crypto policy disables sha1 hash and signature support,Ensure system wide crypto policy disables sha1 hash and signature support,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure system wide crypto policy,1.6.3,Ensure system wide crypto policy disables cbc for ssh,Ensure system wide crypto policy disables cbc for ssh,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure system wide crypto policy,1.6.4,Ensure system wide crypto policy disables macs less than 128 bits,Ensure system wide crypto policy disables macs less than 128 bits,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Command Line Warning Banners,1.7.1,Ensure message of the day is configured properly ,Ensure message of the day is configured properly ,"Adopt CIS.
+<Based on Clusters' / Agencies' approved MOTD>",Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Command Line Warning Banners,1.7.4,Ensure access to /etc/motd is configured,Ensure access to /etc/motd is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Command Line Warning Banners,1.7.5,Ensure access to /etc/issue is configured,Ensure access to /etc/issue is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Command Line Warning Banners,1.7.6,Ensure access to /etc/issue.net is configured,Ensure access to /etc/issue.net is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure GNOME Display Manager,1.8.3,Ensure GDM disable-user-list option is enabled,Ensure GDM disable-user-list option is enabled,Adopt CIS.,Adopt CIS.,NIL,"If GNOME or GDM is not installed, this setting is considered not applicable.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure GNOME Display Manager,1.8.4,Ensure GDM screen locks when the user is idle,Ensure GDM screen locks when the user is idle,Adopt CIS.,Adopt CIS.,NIL,"If GNOME or GDM is not installed, this setting is considered not applicable.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure GNOME Display Manager,1.8.5,Ensure GDM screen locks cannot be overridden,Ensure GDM screen locks cannot be overridden,Adopt CIS.,Adopt CIS.,NIL,"If GNOME or GDM is not installed, this setting is considered not applicable.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure GNOME Display Manager,1.8.6,Ensure GDM automatic mounting of removable media is disabled,Ensure GDM automatic mounting of removable media is disabled,Adopt CIS.,Adopt CIS.,NIL,"If GNOME or GDM is not installed, this setting is considered not applicable.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure GNOME Display Manager,1.8.7,Ensure GDM disabling automatic mounting of removable media is not overridden,Ensure GDM disabling automatic mounting of removable media is not overridden,Adopt CIS.,Adopt CIS.,NIL,"If GNOME or GDM is not installed, this setting is considered not applicable.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure GNOME Display Manager,1.8.8,Ensure GDM autorun-never is enabled,Ensure GDM autorun-never is enabled,Adopt CIS.,Adopt CIS.,NIL,"If GNOME or GDM is not installed, this setting is considered not applicable.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure GNOME Display Manager,1.8.9,Ensure GDM autorun-never is not overridden,Ensure GDM autorun-never is not overridden,Adopt CIS.,Adopt CIS.,NIL,"If GNOME or GDM is not installed, this setting is considered not applicable.",N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure GNOME Display Manager,1.8.10,Ensure XDMCP is not enabled,N.A.,N.A.,N.A.,N.A.,"If GNOME or GDM is not installed, this setting is considered not applicable.",N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Time Synchronization,2.1.1,Ensure time synchronization is in use,Ensure time synchronization is in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Time Synchronization,2.1.2,Ensure chrony is configured,Ensure chrony is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Time Synchronization,2.1.3,Ensure chrony is not run as the root user,Ensure chrony is not run as the root user,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.1,Ensure autofs services are not in use,Ensure autofs services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.2,Ensure avahi daemon services are not in use,Ensure avahi daemon services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.3,Ensure dhcp server services are not in use,Ensure dhcp server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.4,Ensure dns server services are not in use,Ensure dns server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.5,Ensure dnsmasq services are not in use,Ensure dnsmasq services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.6,Ensure samba file server services are not in use,Ensure samba file server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.7,Ensure ftp server services are not in use,Ensure ftp server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.8,Ensure message access server services are not in use,Ensure message access server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.9,Ensure network file system services are not in use,Ensure network file system services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.10,Ensure nis server services are not in use,Ensure nis server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.11,Ensure print server services are not in use,Ensure print server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.12,Ensure rpcbind services are not in use,Ensure rpcbind services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.13,Ensure rsync services are not in use,Ensure rsync services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.15,Ensure telnet server services are not in use,Ensure telnet server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.16,Ensure tftp server services are not in use,Ensure tftp server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.17,Ensure web proxy server services are not in use,Ensure web proxy server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.18,Ensure web server services are not in use,Ensure web server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.19,Ensure xinetd services are not in use,Ensure xinetd services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.20,Ensure X window server services are not in use,Ensure X window server services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Special Purpose Services,2.2.21,Ensure mail transfer agents are configured for local-only mode,Ensure mail transfer agents are configured for local-only mode,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Service Clients,2.3.1,Ensure ftp client is not installed,Ensure ftp client is not installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Service Clients,2.3.2,Ensure ldap client is not installed,Ensure ldap client is not installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Service Clients,2.3.3,Ensure nis client is not installed,Ensure nis client is not installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Service Clients,2.3.4,Ensure telnet client is not installed,Ensure telnet client is not installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Service Clients,2.3.5,Ensure tftp client is not installed,Ensure tftp client is not installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Network Devices,3.1.2,Ensure wireless interfaces are disabled,Ensure wireless interfaces are disabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Devices,3.1.3,Ensure bluetooth services are not in use,Ensure bluetooth services are not in use,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Modules,3.2.1,Ensure dccp kernel module is not available,Ensure dccp kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Modules,3.2.2,Ensure tipc kernel module is not available,Ensure tipc kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Modules,3.2.3,Ensure rds kernel module is not available,Ensure rds kernel module is not available,Adopt CIS.,Adopt CIS.,"This setting is excluded from this check for RedHat server running Oracle RAC (Real Application Clusters), as it is expected to deviate from this setting by design.",NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Modules,3.2.4,Ensure sctp kernel module is not available,Ensure sctp kernel module is not available,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Parameters,3.3.1,Ensure ip forwarding is disabled,Ensure ip forwarding is disabled,Adopt CIS.,Adopt CIS.,"This setting is excluded from this check for RedHat server running Containerization tools such as, Docker and Podman, as they are expected to deviate from this setting by design.",NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Network Kernel Parameters,3.3.2,Ensure packet redirect sending is disabled,Ensure packet redirect sending is disabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Parameters,3.3.3,Ensure bogus icmp responses are ignored,Ensure bogus icmp responses are ignored,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Parameters,3.3.4,Ensure broadcast icmp requests are ignored,Ensure broadcast icmp requests are ignored,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Parameters,3.3.5,Ensure icmp redirects are not accepted,Ensure icmp redirects are not accepted,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Parameters,3.3.6,Ensure secure icmp redirects are not accepted,Ensure secure icmp redirects are not accepted,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Parameters,3.3.7,Ensure reverse path filtering is enabled,Ensure reverse path filtering is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Network Kernel Parameters,3.3.8,Ensure source routed packets are not accepted,Ensure source routed packets are not accepted,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Network Kernel Parameters,3.3.9,Ensure suspicious packets are logged,Ensure suspicious packets are logged,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Parameters,3.3.10,Ensure tcp syn cookies is enabled,Ensure tcp syn cookies is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Network Kernel Parameters,3.3.11,Ensure ipv6 router advertisements are not accepted,Ensure ipv6 router advertisements are not accepted,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure a firewall utility,3.4.1.1,Ensure nftables is installed,N.A.,N.A.,N.A.,N.A.,Synapxe does not leverage on host based firewall / iptables / nftables.,N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure a firewall utility,3.4.1.2,Ensure a single firewall configuration utility is in use,N.A.,N.A.,N.A.,N.A.,Synapxe does not leverage on host based firewall / iptables / nftables.,N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure firewall rules,3.4.2.1,Ensure nftables base chains exist,N.A.,N.A.,N.A.,N.A.,Synapxe does not leverage on host based firewall / iptables / nftables.,N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure firewall rules,3.4.2.2,Ensure host based firewall loopback traffic is configured,N.A.,N.A.,N.A.,N.A.,Synapxe does not leverage on host based firewall / iptables / nftables.,N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure firewall rules,3.4.2.5,Ensure nftables default deny firewall policy,N.A.,N.A.,N.A.,N.A.,Synapxe does not leverage on host based firewall / iptables / nftables.,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure cron,4.1.1.1,Ensure cron daemon is enabled and active,Ensure cron daemon is enabled and active,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure cron,4.1.1.2,Ensure permissions on /etc/crontab are configured,Ensure permissions on /etc/crontab are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure cron,4.1.1.3,Ensure permissions on /etc/cron.hourly are configured,Ensure permissions on /etc/cron.hourly are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure cron,4.1.1.4,Ensure permissions on /etc/cron.daily are configured,Ensure permissions on /etc/cron.daily are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure cron,4.1.1.5,Ensure permissions on /etc/cron.weekly are configured,Ensure permissions on /etc/cron.weekly are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure cron,4.1.1.6,Ensure permissions on /etc/cron.monthly are configured,Ensure permissions on /etc/cron.monthly are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure cron,4.1.1.7,Ensure permissions on /etc/cron.d are configured,Ensure permissions on /etc/cron.d are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure cron,4.1.1.8,Ensure crontab is restricted to authorized users,Ensure crontab is restricted to authorized users,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure at,4.1.2.1,Ensure at is restricted to authorized users,Ensure at is restricted to authorized users,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SSH Server,4.2.1,Ensure permissions on /etc/ssh/sshd_config are configured,Ensure permissions on /etc/ssh/sshd_config are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SSH Server,4.2.2,Ensure permissions on SSH private host key files are configured,Ensure permissions on SSH private host key files are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure SSH Server,4.2.3,Ensure permissions on SSH public host key files are configured,Ensure permissions on SSH public host key files are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.4,Ensure sshd access is configured,Ensure sshd access is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.6,Ensure sshd Ciphers are configured,Ensure sshd Ciphers are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.7,Ensure sshd ClientAliveInterval and ClientAliveCountMax are configured,Ensure sshd ClientAliveInterval and ClientAliveCountMax are configured,Adopt CIS.,Adopt CIS.,NIL,"ClientAliveInterval to set to value of ""300"",
+ClientAliveCountMax to set to value of ""3"".
+
+Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.8,Ensure sshd DisableForwarding is enabled,Ensure sshd DisableForwarding is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.9,Ensure sshd HostbasedAuthentication is disabled,Ensure sshd HostbasedAuthentication is disabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.10,Ensure sshd IgnoreRhosts is enabled,Ensure sshd IgnoreRhosts is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.11,Ensure sshd KexAlgorithms is configured,Ensure sshd KexAlgorithms is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.12,Ensure sshd LoginGraceTime is configured,Ensure sshd LoginGraceTime is configured,"Adopt CIS.
+
+Edit the /etc/ssh/sshd_config file to set the parameter as follows:
+
+LoginGraceTime 60",Adopt CIS.,NIL,"LoginGraceTime to set to value of ""1 min (60 sec)"". 
+
+Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.13,Ensure sshd LogLevel is configured,Ensure SSH LogLevel is set to VERBOSE,"Adopt CIS.
+
+Edit the /etc/ssh/sshd_config file to set the parameter as follows:
+
+LogLevel VERBOSE",Adopt CIS.,NIL,"LogLevel to set is VERBOSE. 
+
+Amend seting where necessary.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.14,Ensure sshd MACs are configured,Ensure sshd MACs are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.15,Ensure sshd MaxAuthTries is configured,Ensure SSH MaxAuthTries is set to 10 (or lower),"Adopt CIS.
+
+Edit the /etc/ssh/sshd_config file to set the parameter as follows:
+
+MaxAuthTries 10 (or lower)",Adopt CIS.,NIL,"MaxAuthTries to set to value of ""10"" (or lower).
+
+Amend setting where necessary.
+
+Reference HIM-ADS #2.2/S1 (j).",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.16,Ensure sshd MaxSessions is configured,Ensure SSH MaxSessions is set to 5,"Adopt CIS.
+
+Edit the /etc/ssh/sshd_config file to set the parameter as follows:
+
+MaxSessions 5",Adopt CIS.,NIL,"MaxSessions to set to value of ""5"". Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.17,Ensure sshd MaxStartups is configured,Ensure sshd MaxStartups is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.18,Ensure sshd PermitEmptyPasswords is disabled,Ensure sshd PermitEmptyPasswords is disabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.19,Ensure sshd PermitRootLogin is disabled,Ensure sshd PermitRootLogin is disabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.20,Ensure sshd PermitUserEnvironment is disabled,Ensure sshd PermitUserEnvironment is disabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.21,Ensure sshd UsePAM is enabled,Ensure sshd UsePAM is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure SSH Server,4.2.22,Ensure sshd crypto_policy is not set,Ensure sshd crypto_policy is not set,Adopt CIS.,Adopt CIS.,NIL,"For H-Cloud, current operational norm is to harden the respective configuration file directly. In order to adopt CIS recommendation to harden via system wide policies, the Unix team requires lead time to perform testing in Staging environment before rollout in Production environment. 
+
+Target completion : By end FY25.",N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure privilege escalation,4.3.1,Ensure sudo is installed,Ensure sudo is installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure privilege escalation,4.3.2,Ensure sudo commands use pty,Ensure sudo commands use pty,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure privilege escalation,4.3.3,Ensure sudo log file exists,Ensure sudo log file exists,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure privilege escalation,4.3.4,Ensure users must provide password for escalation,N.A.,N.A.,N.A.,N.A.,"Based on current mode of operation, access to RHEL servers is via PAM, and access control on who can execute “sudo” and the commands allowed are specified in “/etc/sudoers”. 
+
+RHEL admins do not hold on to any passwords.",N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure privilege escalation,4.3.5,Ensure re-authentication for privilege escalation is not disabled globally,Ensure re-authentication for privilege escalation is not disabled globally,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure privilege escalation,4.3.6,Ensure sudo authentication timeout is configured correctly,Ensure sudo authentication timeout is configured correctly,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure privilege escalation,4.3.7,Ensure access to the su command is restricted,Ensure access to the su command is restricted,Adopt CIS.,Adopt CIS.,"Account ""pamunixrecon"" and ""pamunixread"" are included in /etc/sugroup as part of Synapxe PAM requirement.",NIL,N,YES,Implemented in audit/remediation script.
+2024-11-20 00:00:00,ADOPT,Configure PAM software packages,4.4.1.1,Ensure latest version of pam is installed,Ensure latest version of pam is installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure PAM software packages,4.4.1.2,Ensure latest version of authselect is installed,Ensure latest version of authselect is installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure authselect,4.4.2.1,Ensure active authselect profile includes pam modules,Ensure active authselect profile includes pam modules,Adopt CIS.,Adopt CIS.,NIL,"For H-Cloud, current operational norm is to harden the respective configuration file directly. In order to adopt CIS recommendation to harden via system wide policies, the Unix team requires lead time to perform testing in Staging environment before rollout in Production environment. 
+
+Target completion : By end FY25.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure authselect,4.4.2.2,Ensure pam_faillock module is enabled,Ensure pam_faillock module is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure authselect,4.4.2.3,Ensure pam_pwquality module is enabled,Ensure pam_pwquality module is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure authselect,4.4.2.4,Ensure pam_pwquality module is enabled,Ensure pam_pwquality module is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure authselect,4.4.2.5,Ensure pam_unix module is enabled,Ensure pam_unix module is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.1.1,Ensure password failed attempts lockout is configured,Ensure password failed attempts lockout is set to 10 (or lower),"Adopt CIS.
+
+Edit the /etc/security/faillock.conf file to set the parameter as follows:
+
+deny = 10 (or lower)",Adopt CIS.,NIL,"deny to set to value of ""10"" or (lower),
+
+Amend setting where necessary.
+
+Reference HIM-ADS #2.2/S1 (j).",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.1.2,Ensure password unlock time is configured,Ensure password unlock time is set to 900 (or higher),"Adopt CIS.
+
+Edit the /etc/security/faillock.conf file to set the parameter as follows:
+
+unlock_time = 900 (or higher)",Adopt CIS.,NIL,"unlock_time to set to value of ""900"" or higher.
+
+Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure pluggable module arguments,4.4.3.1.3,Ensure password failed attempts lockout includes root account,N.A.,N.A.,N.A.,N.A.,Not adopted as Synapxe PAM is managing breakglass accounts.,N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure pluggable module arguments,4.4.3.2.1,Ensure password number of changed characters is configured,N.A.,N.A.,N.A.,N.A.,Not adopted as this password requirement is currently not mandated in Synapxe HIM policies.,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.2.2,Ensure password length is configured,Ensure password length is set to 12 (or higher),"Adopt CIS.
+
+Edit the /etc/security/pwquality.conf file to set the parameter as follows:
+
+minlen = 12 (or higher)",Adopt CIS.,NIL,"minlen to set to value of ""12"" (or higher). 
+
+Amend setting where necessary.
+
+Reference HIM-ADS #2.2/S1 (a).",N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure pluggable module arguments,4.4.3.2.4,Ensure password same consecutive characters is configured,N.A.,N.A.,N.A.,N.A.,Not adopted as this password requirement is currently not mandated in Synapxe HIM policies.,N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure pluggable module arguments,4.4.3.2.5,Ensure password maximum sequential characters is configured,N.A.,N.A.,N.A.,N.A.,Not adopted as this password requirement is currently not mandated in Synapxe HIM policies.,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.2.6,Ensure password dictionary check is enabled,Ensure password dictionary check is enabled,Adopt CIS.,Adopt CIS.,NIL,"HIM-ADS states to ""Prohibit accepting passwords that are commonly used, guessable or compromised"".
+
+Reference HIM-ADS #2.2/S1 (c).",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.2.7,Ensure password quality is enforced for the root user,Ensure password quality is enforced for the root user,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.3.1,Ensure password history remember is configured,Ensurepassword history remember is set to 3 (or higher),"Adopt CIS.
+
+Edit the /etc/security/pwquality.conf file to set the parameter as follows:
+
+minclass = 3 (or higher)",Adopt CIS.,NIL,"remember to set to value of ""3"" (or higher). 
+
+Amend setting where necessary.
+
+Reference HIM-ADS #2.2/S1 (f).",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.3.2,Ensure password history is enforced for the root user,Ensure password history is enforced for the root user,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.3.3,Ensure pam_pwhistory includes use_authtok,Ensure pam_pwhistory includes use_authtok,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.4.1,Ensure pam_unix does not include nullok,Ensure pam_unix does not include nullok,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.4.2,Ensure pam_unix does not include remember,Ensure pam_unix does not include remember,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.4.3,Ensure pam_unix includes a strong password hashing algorithm,Ensure pam_unix includes a strong password hashing algorithm,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure pluggable module arguments,4.4.3.4.4,Ensure pam_unix includes use_authtok,Ensure pam_unix includes use_authtok,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure shadow password suite parameters,4.5.1.1,Ensure strong password hashing algorithm is configured,Ensure strong password hashing algorithm is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure shadow password suite parameters,4.5.1.2,Ensure password expiration is 365 days or less,Ensure password expiration is 365 days or less,Adopt CIS.,Adopt CIS.,Accounts using SSH key instead of password authentication is exempted from this setting. SSH key renewal to align with PKI SSL cert renewal frequency.,"To align with HIM-ISP Password Management requirement.
+
+Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure shadow password suite parameters,4.5.1.3,Ensure password expiration warning days is 7 or more,Ensure password expiration warning days is 14,Adopt CIS.,Adopt CIS.,NIL,"PASS_WARN_AGE to set to value of ""14"". 
+
+Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure shadow password suite parameters,4.5.1.4,Ensure inactive password lock is 30 days or less,Ensure inactive password lock is 90 days,Adopt CIS.,Adopt CIS.,NIL,"INACTIVE to set to value of ""90"". 
+
+Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure shadow password suite parameters,4.5.1.5,Ensure all users last password change date is in the past,Ensure all users last password change date is in the past,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure root and system accounts and environment,4.5.2.1,Ensure default group for the root account is GID 0,Ensure default group for the root account is GID 0,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure root and system accounts and environment,4.5.2.2,Ensure root user umask is configured,Ensure root user umask is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure root and system accounts and environment,4.5.2.3,Ensure system accounts are secured,Ensure system accounts are secured,Adopt CIS.,Adopt CIS.,"The following account is exempted from this setting, as it is required by Synapxe's EVMS:
+- svevmsvaunix01 ",NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure root and system accounts and environment,4.5.2.4,Ensure root password is set,Ensure root password is set,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure user default environment,4.5.3.1,Ensure nologin is not listed in /etc/shells,Ensure nologin is not listed in /etc/shells,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure user default environment,4.5.3.2,Ensure default user shell timeout is configured,Ensure default user shell timeout is configured,Adopt CIS.,Adopt CIS.,NIL,"TMOUT to set to value of ""900"". 
+
+Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure user default environment,4.5.3.3,Ensure default user umask is configured,Ensure default user umask is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure rsyslog,5.1.1.1,Ensure rsyslog is installed,Ensure rsyslog is installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure rsyslog,5.1.1.2,Ensure rsyslog service is enabled,Ensure rsyslog service is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure rsyslog,5.1.1.3,Ensure journald is configured to send logs to rsyslog,Ensure journald is configured to send logs to rsyslog,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure rsyslog,5.1.1.4,Ensure rsyslog default file permissions are configured,Ensure rsyslog default file permissions are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure rsyslog,5.1.1.7,Ensure rsyslog is not configured to receive logs from a remote client,Ensure rsyslog is not configured to receive logs from a remote client,Adopt CIS.,Adopt CIS.,Not applicable for HCC.,"For HCC, the logs are forwarded to AWS Cloudwatch Service or Azure Log Analytics Workspace through ""amazon-cloudwatch-agent"" and ""ama-agent"" respectively, rsyslog does not apply.",N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure journald,5.1.2.1.4,Ensure journald is not configured to receive logs from a remote client,N.A.,N.A.,N.A.,N.A.,"1) rsyslog is default logging mechanism. 
+2) journald not in used.",N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure journald,5.1.2.3,Ensure journald is configured to compress large log files,N.A.,N.A.,N.A.,N.A.,"1) rsyslog is default logging mechanism. 
+2) journald not in used.",N,YES,Implemented in audit/remediation script.
+N.A.,NOT ADOPTED,Configure journald,5.1.2.4,Ensure journald is configured to write logfiles to persistent disk,N.A.,N.A.,N.A.,N.A.,"1) rsyslog is default logging mechanism. 
+2) journald not in used.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure journald,5.1.4,Ensure all logfiles have appropriate access configured,Ensure all logfiles have appropriate access configured,Adopt CIS.,Adopt CIS.,"The following log files are exempted from this setting, as they are created by the OS with the default permission of 644:
+
+/var/log/wtmp, 
+/var/log/btmp, 
+/var/log/lastlog, 
+/var/log/messages (clustered servers), 
+/var/log/sa/*, 
+/var/log/sdcsslog/SISIDSEvents.csv, 
+/var/log/sdcsslog/SAEPRTEvents.csv, 
+/var/log/sdcsslog/sisipsdaemon.log",NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Ensure auditing is enabled,5.2.1.1,Ensure audit is installed,Ensure audit is installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Ensure auditing is enabled,5.2.1.2,Ensure auditing for processes that start prior to auditd is enabled,Ensure auditing for processes that start prior to auditd is enabled,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Ensure auditing is enabled,5.2.1.3,Ensure audit_backlog_limit is sufficient,Ensure audit_backlog_limit is sufficient,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Ensure auditing is enabled,5.2.1.4,Ensure auditd service is enabled ,Ensure auditd service is enabled ,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Data Retention,5.2.2.1,Ensure audit log storage size is configured,Ensure audit log storage size is configured,Adopt CIS.,Adopt CIS.,NIL,max_log_file to be based on current operational requirement. Amend setting where necessary.,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Data Retention,5.2.2.2,Ensure audit logs are not automatically deleted,Ensure audit logs are rotated,Adopt CIS.,Adopt CIS.,NIL,"max_log_file_action to set to value of  ""rotate"". Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Data Retention,5.2.2.3,Ensure system is disabled when audit logs are full,Ensure system is suspended when audit logs are full,"Edit the /etc/audit/auditd.conf file to set the parameter as follows:
+
+disk_full_action = <suspend> 
+disk_error_action = <suspend>",Adopt CIS.,NIL,"disk_full_action to set to value of ""suspend"",
+disk_error_action to set to value of ""suspend""
+
+Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Data Retention,5.2.2.4,Ensure system warns when audit logs are low on space,Ensure system warns when audit logs are low on space,"Edit the /etc/audit/auditd.conf file to set the parameter as follows:
+
+space_left_action =""email
+admin_space_left_action = suspend",Adopt CIS.,NIL,"space_left_action to set to value of ""email"", admin_space_left_action to set to value of ""suspend"". 
+
+Amend setting where necessary.",N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.1,Ensure changes to system administration scope (sudoers) is collected,Ensure changes to system administration scope (sudoers) is collected,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.2,Ensure actions as another user are always logged,Ensure actions as another user are always logged,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.3,Ensure events that modify the sudo log file are collected,Ensure events that modify the sudo log file are collected,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.4,Ensure events that modify date and time information are collected,Ensure events that modify date and time information are collected,Adopt CIS.,Adopt CIS.,"For IBM Power Systems (PPC64lE), follow the same procedures as for 64 bit systems and ignore any entries with b32.",NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.5,Ensure events that modify the system's network environment are collected,Ensure events that modify the system's network environment are collected,Adopt CIS.,Adopt CIS.,"For IBM Power Systems (PPC64lE), follow the same procedures as for 64 bit systems and ignore any entries with b32.",NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.7,Ensure unsuccessful file access attempts are collected,Ensure unsuccessful file access attempts are collected,Adopt CIS.,Adopt CIS.,"For IBM Power Systems (PPC64lE), follow the same procedures as for 64 bit systems and ignore any entries with b32.",NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.8,Ensure events that modify user/group information are collected,Ensure events that modify user/group information are collected,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.9,Ensure discretionary access control permission modification events are collected,Ensure discretionary access control permission modification events are collected,Adopt CIS.,Adopt CIS.,"For IBM Power Systems (PPC64lE), follow the same procedures as for 64 bit systems and ignore any entries with b32.",NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.10,Ensure successful file system mounts are collected,Ensure successful file system mounts are collected,Adopt CIS.,Adopt CIS.,"For IBM Power Systems (PPC64lE), follow the same procedures as for 64 bit systems and ignore any entries with b32.",NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.11,Ensure session initiation information is collected,Ensure session initiation information is collected,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.12,Ensure login and logout events are collected,Ensure login and logout events are collected,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.13,Ensure file deletion events by users are collected,Ensure file deletion events by users are collected,Adopt CIS.,Adopt CIS.,"For IBM Power Systems (PPC64lE), follow the same procedures as for 64 bit systems and ignore any entries with b32.",NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.14,Ensure events that modify the system's Mandatory Access Controls are collected,Ensure events that modify the system's Mandatory Access Controls are collected,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.15,Ensure successful and unsuccessful attempts to use the chcon command are recorded,Ensure successful and unsuccessful attempts to use the chcon command are recorded,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.16,Ensure successful and unsuccessful attempts to use the setfacl command are recorded,Ensure successful and unsuccessful attempts to use the setfacl command are recorded,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.17,Ensure successful and unsuccessful attempts to use the chacl command are recorded,Ensure successful and unsuccessful attempts to use the chacl command are recorded,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.18,Ensure successful and unsuccessful attempts to use the usermod command are recorded,Ensure successful and unsuccessful attempts to use the usermod command are recorded,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.19,Ensure kernel module loading unloading and modification is collected,Ensure kernel module loading unloading and modification is collected,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure auditd rules,5.2.3.20,Ensure the audit configuration is immutable,Ensure the audit configuration is immutable,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure auditd file access,5.2.4.1,Ensure the audit log directory is 0750 or more restrictive,Ensure the audit log directory is 0750 or more restrictive,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure auditd file access,5.2.4.2,Ensure audit log files are mode 0640 or less permissive,Ensure audit log files are mode 0640 or less permissive,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure auditd file access,5.2.4.3,Ensure only authorized users own audit log files,Ensure only authorized users own audit log files,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure auditd file access,5.2.4.4,Ensure only authorized groups are assigned ownership of audit log files,Ensure only authorized groups are assigned ownership of audit log files,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure auditd file access,5.2.4.5,Ensure audit configuration files are 640 or more restrictive,Ensure audit configuration files are 640 or more restrictive,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure auditd file access,5.2.4.6,Ensure audit configuration files are owned by root,Ensure audit configuration files are owned by root,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure auditd file access,5.2.4.7,Ensure audit configuration files belong to group root,Ensure audit configuration files belong to group root,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure auditd file access,5.2.4.8,Ensure audit tools are 755 or more restrictive,Ensure audit tools are 755 or more restrictive,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure auditd file access,5.2.4.9,Ensure audit tools are owned by root,Ensure audit tools are owned by root,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure auditd file access,5.2.4.10,Ensure audit tools belong to group root,Ensure audit tools belong to group root,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Integrity Checking,5.3.1,Ensure AIDE is installed,Ensure AIDE is installed,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Configure Integrity Checking,5.3.2,Ensure filesystem integrity is regularly checked,Ensure filesystem integrity is regularly checked,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Configure Integrity Checking,5.3.3,Ensure cryptographic mechanisms are used to protect the integrity of audit tools,Ensure cryptographic mechanisms are used to protect the integrity of audit tools,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,System File Permissions,6.1.1,Ensure permissions on /etc/passwd are configured,Ensure permissions on /etc/passwd are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,System File Permissions,6.1.2,Ensure permissions on /etc/passwd- are configured,Ensure permissions on /etc/passwd- are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,System File Permissions,6.1.3,Ensure permissions on /etc/opasswd are configured,Ensure permissions on /etc/opasswd are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,System File Permissions,6.1.4,Ensure permissions on /etc/group are configured,Ensure permissions on /etc/group are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,System File Permissions,6.1.5,Ensure permissions on /etc/group- are configured,Ensure permissions on /etc/group- are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,System File Permissions,6.1.6,Ensure permissions on /etc/shadow are configured,Ensure permissions on /etc/shadow are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,System File Permissions,6.1.7,Ensure permissions on /etc/shadow- are configured,Ensure permissions on /etc/shadow- are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,System File Permissions,6.1.8,Ensure permissions on /etc/gshadow are configured,Ensure permissions on /etc/gshadow are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,System File Permissions,6.1.9,Ensure permissions on /etc/gshadow- are configured,Ensure permissions on /etc/gshadow- are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,System File Permissions,6.1.10,Ensure permissions on /etc/shells are configured,Ensure permissions on /etc/shells are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,System File Permissions,6.1.11,Ensure world writable files and directories are secured,Ensure world writable files and directories are secured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,System File Permissions,6.1.12,Ensure no unowned or ungrouped files or directories exist,Ensure no unowned or ungrouped files or directories exist,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Local User and Group Settings,6.2.1,Ensure accounts in /etc/passwd use shadowed passwords,Ensure accounts in /etc/passwd use shadowed passwords,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Local User and Group Settings,6.2.2,Ensure /etc/shadow password fields are not empty,Ensure /etc/shadow password fields are not empty,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Local User and Group Settings,6.2.3,Ensure all groups in /etc/passwd exist in /etc/group,Ensure all groups in /etc/passwd exist in /etc/group,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Local User and Group Settings,6.2.4,Ensure no duplicate UIDs exist,Ensure no duplicate UIDs exist,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Local User and Group Settings,6.2.5,Ensure no duplicate GIDs exist,Ensure no duplicate GIDs exist,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Local User and Group Settings,6.2.6,Ensure no duplicate user names exist,Ensure no duplicate user names exist,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Local User and Group Settings,6.2.7,Ensure no duplicate group names exist,Ensure no duplicate group names exist,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Local User and Group Settings,6.2.8,Ensure root PATH Integrity,Ensure root PATH Integrity,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+Existing,ADOPT,Local User and Group Settings,6.2.9,Ensure root is the only UID 0 account,Ensure root is the only UID 0 account,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Local User and Group Settings,6.2.10,Ensure local interactive user home directories are configured,Ensure local interactive user home directories are configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
+New,ADOPT,Local User and Group Settings,6.2.11,Ensure local interactive user dot files access is configured,Ensure local interactive user dot files access is configured,Adopt CIS.,Adopt CIS.,NIL,NIL,N,YES,Implemented in audit/remediation script.
