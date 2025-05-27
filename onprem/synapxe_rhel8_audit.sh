@@ -130,18 +130,22 @@ generate_summary() {
     generate_html_report "$total_tests" "$passed_tests" "$failed_tests" "$compliance_rate"
 }
 
-# Enhanced HTML report generation
+# Enhanced HTML report generation with fixed output handling
 generate_html_report() {
     local total_tests=$1
     local passed_tests=$2
     local failed_tests=$3
     local compliance_rate=$4
     local report_file="${RESULT_FILE}.html"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
+    # Create HTML report with proper escaping and formatting
     cat > "$report_file" << EOF
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Synapxe RHEL 8 Audit Report</title>
     <style>
         body {
@@ -177,12 +181,14 @@ generate_html_report() {
             border-radius: 4px;
             height: 20px;
             margin: 10px 0;
+            overflow: hidden;
         }
         .progress-fill {
             background: #28a745;
             height: 100%;
             border-radius: 4px;
             transition: width 0.5s ease-in-out;
+            width: ${compliance_rate}%;
         }
         .section {
             margin: 20px 0;
@@ -190,10 +196,10 @@ generate_html_report() {
             border: 1px solid #dee2e6;
             border-radius: 4px;
         }
-        .pass { color: #28a745; font-weight: bold; }
-        .fail { color: #dc3545; font-weight: bold; }
-        .info { color: #17a2b8; font-weight: bold; }
-        .warning { color: #ffc107; font-weight: bold; }
+        .pass { color: #28a745; }
+        .fail { color: #dc3545; }
+        .info { color: #17a2b8; }
+        .warning { color: #ffc107; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -213,13 +219,13 @@ generate_html_report() {
     <div class="container">
         <div class="header">
             <h1>Synapxe RHEL 8 Audit Report</h1>
-            <p>Generated on: $(date '+%Y-%m-%d %H:%M:%S')</p>
+            <p>Generated on: ${timestamp}</p>
         </div>
         
         <div class="summary-box">
             <h2>Executive Summary</h2>
             <div class="progress-bar">
-                <div class="progress-fill" style="width: ${compliance_rate}%"></div>
+                <div class="progress-fill"></div>
             </div>
             <p>Compliance Rate: ${compliance_rate}%</p>
             <table>
@@ -231,32 +237,35 @@ generate_html_report() {
         </div>
 
         <div class="results">
-            $(awk '{
-                if ($0 ~ /=====/) {
-                    print "</div><div class=\"section\">";
-                    print "<h3>" prev "</h3>";
-                } else if ($0 ~ /\[PASS\]/) {
-                    gsub(/\[PASS\]/, "<span class=\"pass\">[PASS]</span>");
-                    print "<p>" $0 "</p>";
-                } else if ($0 ~ /\[FAIL\]/) {
-                    gsub(/\[FAIL\]/, "<span class=\"fail\">[FAIL]</span>");
-                    print "<p>" $0 "</p>";
-                } else if ($0 ~ /\[INFO\]/) {
-                    gsub(/\[INFO\]/, "<span class=\"info\">[INFO]</span>");
-                    print "<p>" $0 "</p>";
-                } else if ($0 ~ /\[WARN\]/) {
-                    gsub(/\[WARN\]/, "<span class=\"warning\">[WARN]</span>");
-                    print "<p>" $0 "</p>";
-                }
-                prev = $0;
-            }' "$RESULT_FILE")
+EOF
+
+    # Process the results file and add formatted content
+    while IFS= read -r line; do
+        if [[ $line == *"[PASS]"* ]]; then
+            echo "<p><span class=\"pass\">${line}</span></p>" >> "$report_file"
+        elif [[ $line == *"[FAIL]"* ]]; then
+            echo "<p><span class=\"fail\">${line}</span></p>" >> "$report_file"
+        elif [[ $line == *"[INFO]"* ]]; then
+            echo "<p><span class=\"info\">${line}</span></p>" >> "$report_file"
+        elif [[ $line == *"[WARNING]"* ]]; then
+            echo "<p><span class=\"warning\">${line}</span></p>" >> "$report_file"
+        elif [[ $line == *"="* ]]; then
+            echo "<h3>${line}</h3>" >> "$report_file"
+        else
+            echo "<p>${line}</p>" >> "$report_file"
+        fi
+    done < "$RESULT_FILE"
+
+    # Close HTML document
+    cat >> "$report_file" << EOF
         </div>
     </div>
 </body>
 </html>
 EOF
 
-    chmod 600 "$report_file"
+    # Set proper permissions
+    chmod 644 "$report_file"
     log "HTML report generated: $report_file"
 }
 
@@ -718,33 +727,6 @@ monitor_resources() {
 # Start monitoring
 monitor_resources $$ &
 MONITOR_PID=$!
-
-generate_html_report() {
-    local report_file="${RESULT_FILE}.html"
-    
-    cat > "$report_file" << EOF
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Synapxe RHEL 8 Audit Report</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .pass { color: green; }
-        .fail { color: red; }
-        .info { color: blue; }
-    </style>
-</head>
-<body>
-    <h1>Audit Report</h1>
-    <pre>
-$(cat "$RESULT_FILE" | sed 's/\[PASS\]/<span class="pass">[PASS]<\/span>/g' \
-                         | sed 's/\[FAIL\]/<span class="fail">[FAIL]<\/span>/g' \
-                         | sed 's/\[INFO\]/<span class="info">[INFO]<\/span>/g')
-    </pre>
-</body>
-</html>
-EOF
-}
 
 # Add test metadata structure
 declare -A TEST_METADATA
