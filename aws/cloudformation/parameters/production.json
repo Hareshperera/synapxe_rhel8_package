@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "ScheduleExpression",
+    "ParameterValue": "rate(7 days)"
+  },
+  {
+    "ParameterKey": "TargetEnvironment",
+    "ParameterValue": "Production"
+  }
+] 

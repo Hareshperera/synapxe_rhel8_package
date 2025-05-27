@@ -1,0 +1,204 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Synapxe RHEL8 Audit SSM Automation'
+
+Parameters:
+  ScheduleExpression:
+    Type: String
+    Default: 'rate(7 days)'
+    Description: 'Schedule for running the audit (using AWS EventBridge rate expression)'
+  
+  TargetEnvironment:
+    Type: String
+    Default: 'Production'
+    AllowedValues: ['Production', 'Staging', 'Development']
+    Description: 'Target environment for the audit'
+
+Resources:
+  AuditS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "synapxe-rhel8-audit-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ArchiveOldReports
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90
+                StorageClass: STANDARD_IA
+            ExpirationInDays: 365
+
+  AuditKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: 'KMS key for encrypting audit results'
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: 'Enable IAM User Permissions'
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+
+  AuditRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - ssm.amazonaws.com
+                - ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: AuditS3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource: 
+                  - !Sub "${AuditS3Bucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt AuditKMSKey.Arn
+
+  AuditSSMDocument:
+    Type: AWS::SSM::Document
+    Properties:
+      DocumentType: Command
+      DocumentFormat: YAML
+      Content:
+        schemaVersion: '2.2'
+        description: 'Synapxe RHEL8 Security Audit'
+        parameters:
+          Environment:
+            type: String
+            description: 'Environment being audited'
+            default: 'Production'
+            allowedValues:
+              - Production
+              - Staging
+              - Development
+          OutputBucket:
+            type: String
+            description: 'S3 bucket for audit results'
+          KMSKeyId:
+            type: String
+            description: 'KMS key for encryption'
+        mainSteps:
+          - action: aws:runShellScript
+            name: DownloadAuditScript
+            inputs:
+              runCommand:
+                - |
+                  # Download the latest audit script from S3
+                  aws s3 cp s3://{{ OutputBucket }}/scripts/synapxe_rhel8_audit.sh /tmp/
+                  chmod +x /tmp/synapxe_rhel8_audit.sh
+
+          - action: aws:runShellScript
+            name: PrepareSystem
+            inputs:
+              runCommand:
+                - |
+                  # Install required packages
+                  yum install -y nftables firewalld
+                  
+                  # Create audit directory
+                  mkdir -p /var/log/synapxe_audit
+                  chmod 750 /var/log/synapxe_audit
+
+          - action: aws:runShellScript
+            name: RunAudit
+            inputs:
+              runCommand:
+                - |
+                  # Set environment variables
+                  export AUDIT_ENV="{{ Environment }}"
+                  export AUDIT_BUCKET="{{ OutputBucket }}"
+                  export AWS_REGION="{{ aws:region }}"
+                  
+                  # Run the audit script
+                  /tmp/synapxe_rhel8_audit.sh
+                  
+                  # Upload results to S3
+                  INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  
+                  aws s3 cp /var/log/synapxe_audit/synapxe_rhel8_audit_results.txt \
+                    s3://{{ OutputBucket }}/results/${INSTANCE_ID}/${TIMESTAMP}/audit_results.txt \
+                    --sse aws:kms --sse-kms-key-id {{ KMSKeyId }}
+                  
+                  aws s3 cp /var/log/synapxe_audit/synapxe_rhel8_audit_results.html \
+                    s3://{{ OutputBucket }}/results/${INSTANCE_ID}/${TIMESTAMP}/audit_results.html \
+                    --sse aws:kms --sse-kms-key-id {{ KMSKeyId }}
+
+          - action: aws:runShellScript
+            name: Cleanup
+            inputs:
+              runCommand:
+                - |
+                  # Cleanup temporary files
+                  rm -f /tmp/synapxe_rhel8_audit.sh
+                  find /var/log/synapxe_audit -type f -mtime +7 -delete
+
+  AuditAutomation:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: 'Schedule RHEL8 Security Audit'
+      ScheduleExpression: !Ref ScheduleExpression
+      State: ENABLED
+      Targets:
+        - Arn: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:document/${AuditSSMDocument}'
+          Id: 'RunAudit'
+          RoleArn: !GetAtt AuditRole.Arn
+          Input: !Sub |
+            {
+              "Environment": "${TargetEnvironment}",
+              "OutputBucket": "${AuditS3Bucket}",
+              "KMSKeyId": "${AuditKMSKey}"
+            }
+          RunCommandParameters:
+            RunCommandTargets:
+              - Key: tag:OS
+                Values: ['RHEL8']
+
+  SNSNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub 'synapxe-rhel8-audit-notifications-${AWS::Region}'
+      KmsMasterKeyId: !Ref AuditKMSKey
+
+Outputs:
+  AuditBucketName:
+    Description: 'Name of the S3 bucket storing audit results'
+    Value: !Ref AuditS3Bucket
+
+  AuditDocumentName:
+    Description: 'Name of the SSM document for running audits'
+    Value: !Ref AuditSSMDocument
+
+  NotificationTopicArn:
+    Description: 'ARN of the SNS topic for audit notifications'
+    Value: !Ref SNSNotificationTopic 
