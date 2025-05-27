@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Synapxe Custom CIS RHEL 8 Audit Script - Based on Baseline 2025
+# Synapxe Custom CIS RHEL 8 Audit Script - Based on Baseline 2025 by CPE Team 
 
 # Error handling function
 handle_error() {
