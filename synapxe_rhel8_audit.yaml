@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Synapxe RHEL8 Audit Configuration and Automation'
+Description: 'Synapxe RHEL8 Audit Configuration and Automation by CPE team'
 
 Parameters:
   ScheduleExpression:
