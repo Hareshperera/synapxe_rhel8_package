@@ -57,10 +57,11 @@ HOSTNAME=$(hostname -s)
 FQDN=$(hostname -f)
 OS_VERSION=$(cat /etc/redhat-release 2>/dev/null || echo "OS Version not found")
 KERNEL_VERSION=$(uname -r)
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Secure results directory
 RESULT_DIR="/var/log/synapxe_audit"
-RESULT_FILE="${RESULT_DIR}/synapxe_rhel8_audit_${HOSTNAME}_$(date +%Y%m%d_%H%M%S).txt"
+RESULT_FILE="${RESULT_DIR}/${HOSTNAME}_synapxe_rhel8_audit_${TIMESTAMP}.txt"
 
 # Create secure results directory
 mkdir -p "${RESULT_DIR}" || handle_error "Failed to create results directory"
@@ -158,7 +159,7 @@ generate_html_report() {
     local passed_tests=$2
     local failed_tests=$3
     local compliance_rate=$4
-    local report_file="${RESULT_DIR}/synapxe_rhel8_audit_${HOSTNAME}_$(date +%Y%m%d_%H%M%S).html"
+    local report_file="${RESULT_DIR}/${HOSTNAME}_synapxe_rhel8_audit_${TIMESTAMP}.html"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     # Ensure directory exists
