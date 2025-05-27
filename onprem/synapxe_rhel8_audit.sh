@@ -75,35 +75,51 @@ done
 # Initialize results file
 > "$RESULT_FILE" || handle_error "Failed to create results file"
 
-# Enhanced logging functions with timestamps and severity levels
-# Enhanced logging with rotation
-setup_logging() {
-    local max_logs=5
-    local compress_after=7 # days
-
-    # Rotate existing logs
-    for ((i=max_logs; i>0; i--)); do
-        if [ -f "${RESULT_FILE}.$((i-1))" ]; then
-            mv "${RESULT_FILE}.$((i-1))" "${RESULT_FILE}.$i"
-        fi
-    done
-
-    # Compress old logs
-    find "$RESULT_DIR" -name "*.txt.*" -mtime +$compress_after -exec gzip {} \;
-}
-
+# Enhanced logging with syslog integration and JSON output
 log() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local severity=${2:-INFO}
     local indent="    "
     local log_entry="[${timestamp}] [${severity}] ${indent}${1}"
     
+    # Standard log file output
     echo "$log_entry" | tee -a "$RESULT_FILE"
+    
+    # Syslog integration
+    logger -t "synapxe_audit" -p "local0.${severity,,}" "$1"
+    
+    # JSON output if enabled
+    if [ "${JSON_OUTPUT:-false}" = true ]; then
+        printf '{"timestamp":"%s","severity":"%s","message":"%s"}\n' \
+            "$timestamp" "$severity" "$1" >> "${RESULT_FILE}.json"
+    fi
     
     # Archive logs if file size exceeds limit
     if [ -f "$RESULT_FILE" ] && [ $(stat -f%z "$RESULT_FILE") -gt 5242880 ]; then # 5MB
         setup_logging
     fi
+}
+
+# Enhanced log rotation with compression
+setup_logging() {
+    local max_logs=5
+    local compress_after=7 # days
+    local compress_cmd="gzip -9"  # Maximum compression
+
+    # Rotate existing logs
+    for ((i=max_logs; i>0; i--)); do
+        if [ -f "${RESULT_FILE}.$((i-1))" ]; then
+            mv "${RESULT_FILE}.$((i-1))" "${RESULT_FILE}.$i"
+            
+            # Compress logs older than compress_after days
+            if [ $i -gt $compress_after ] && [ ! -f "${RESULT_FILE}.$i.gz" ]; then
+                $compress_cmd "${RESULT_FILE}.$i"
+            fi
+        fi
+    done
+
+    # Cleanup old compressed logs
+    find "$RESULT_DIR" -name "*.gz" -mtime +30 -delete
 }
 
 log_section() {
@@ -338,14 +354,61 @@ sysctl kernel.kptr_restrict | grep -q "1" && log " - [PASS] kptr_restrict enable
 log_section "1.6 - Crypto Policy"
 grep -q "DEFAULT" /etc/crypto-policies/config && log " - [PASS] DEFAULT crypto policy in use" || log " - [WARN] DEFAULT crypto policy not in use"
 
+# Check SHA1 hash and signature support
+update-crypto-policies --show | grep -q "SHA1:" && log " - [FAIL] SHA1 hash is enabled" || log " - [PASS] SHA1 hash is disabled"
+
+# Check CBC for SSH
+update-crypto-policies --show | grep -q "CBC:" && log " - [FAIL] CBC ciphers are enabled" || log " - [PASS] CBC ciphers are disabled"
+
+# Check MACs less than 128 bits
+update-crypto-policies --show | grep -q "MAC-<128:" && log " - [FAIL] MACs less than 128 bits are enabled" || log " - [PASS] MACs less than 128 bits are disabled"
+
 log_section "1.7 - Warning Banners"
 [ -f /etc/issue ] && grep -qi "authorized" /etc/issue && log " - [PASS] /etc/issue contains warning" || log " - [FAIL] /etc/issue missing warning"
 [ -f /etc/issue.net ] && grep -qi "authorized" /etc/issue.net && log " - [PASS] /etc/issue.net contains warning" || log " - [FAIL] /etc/issue.net missing warning"
 [ -f /etc/motd ] && stat -c "%a" /etc/motd | grep -q "644" && log " - [PASS] /etc/motd has 644 permissions" || log " - [FAIL] /etc/motd does not have 644 permissions"
 
 log_section "1.8 - GNOME Display Manager"
-rpm -q gdm > /dev/null && log " - [INFO] GNOME is installed" || log " - [PASS] GNOME is not installed"
-[ -f /etc/dconf/db/gdm.d/00-security-settings ] && grep -q "disable-user-list=true" /etc/dconf/db/gdm.d/00-security-settings && log " - [PASS] User list disabled in GDM" || log " - [FAIL] User list not disabled in GDM"
+if rpm -q gdm > /dev/null; then
+    log " - [INFO] GNOME is installed"
+    
+    # Check screen lock settings
+    if [ -f "/etc/dconf/db/local.d/00-screensaver" ]; then
+        grep -q "idle-delay=uint32 900" /etc/dconf/db/local.d/00-screensaver && \
+            log " - [PASS] Screen lock timeout configured" || \
+            log " - [FAIL] Screen lock timeout not configured"
+        
+        grep -q "lock-enabled=true" /etc/dconf/db/local.d/00-screensaver && \
+            log " - [PASS] Screen lock enabled" || \
+            log " - [FAIL] Screen lock not enabled"
+    else
+        log " - [FAIL] Screen lock configuration file missing"
+    fi
+    
+    # Check automount settings
+    if [ -f "/etc/dconf/db/local.d/00-media-automount" ]; then
+        grep -q "automount=false" /etc/dconf/db/local.d/00-media-automount && \
+            log " - [PASS] Automount disabled" || \
+            log " - [FAIL] Automount enabled"
+            
+        grep -q "automount-open=false" /etc/dconf/db/local.d/00-media-automount && \
+            log " - [PASS] Automount-open disabled" || \
+            log " - [FAIL] Automount-open enabled"
+    else
+        log " - [FAIL] Media automount configuration file missing"
+    fi
+    
+    # Check autorun settings
+    if [ -f "/etc/dconf/db/local.d/00-autorun" ]; then
+        grep -q "autorun-never=true" /etc/dconf/db/local.d/00-autorun && \
+            log " - [PASS] Autorun disabled" || \
+            log " - [FAIL] Autorun enabled"
+    else
+        log " - [FAIL] Autorun configuration file missing"
+    fi
+else
+    log " - [PASS] GNOME is not installed"
+fi
 
 log "\nChapter 1 complete. Results saved in $RESULT_FILE"
 
@@ -545,6 +608,52 @@ grep -E '^PASS_WARN_AGE\s+7' /etc/login.defs && log " - [PASS] PASS_WARN_AGE is 
 # 5.5 - Root and Admin Restrictions
 grep '^root:' /etc/passwd | cut -f7 -d: | grep -q "/bin/bash" && log " - [PASS] root has valid shell" || log " - [FAIL] root shell misconfigured"
 awk -F: '($3 == 0) { print $1 }' /etc/passwd | grep -q '^root$' && log " - [PASS] Only root has UID 0" || log " - [FAIL] Multiple users have UID 0"
+
+# Enhanced SSH configuration checks
+check_ssh_ciphers() {
+    local allowed_ciphers="aes256-ctr,aes192-ctr,aes128-ctr"
+    local allowed_macs="hmac-sha2-512,hmac-sha2-256"
+    local allowed_kex="ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group14-sha256"
+    
+    # Check Ciphers
+    if grep -q "^Ciphers" "$sshd_config"; then
+        local configured_ciphers=$(grep "^Ciphers" "$sshd_config" | cut -d' ' -f2-)
+        if [[ "$configured_ciphers" == "$allowed_ciphers" ]]; then
+            log " - [PASS] SSH Ciphers properly configured"
+        else
+            log " - [FAIL] SSH Ciphers misconfigured (found: $configured_ciphers)"
+        fi
+    else
+        log " - [FAIL] SSH Ciphers not explicitly configured"
+    fi
+    
+    # Check MACs
+    if grep -q "^MACs" "$sshd_config"; then
+        local configured_macs=$(grep "^MACs" "$sshd_config" | cut -d' ' -f2-)
+        if [[ "$configured_macs" == "$allowed_macs" ]]; then
+            log " - [PASS] SSH MACs properly configured"
+        else
+            log " - [FAIL] SSH MACs misconfigured (found: $configured_macs)"
+        fi
+    else
+        log " - [FAIL] SSH MACs not explicitly configured"
+    fi
+    
+    # Check KexAlgorithms
+    if grep -q "^KexAlgorithms" "$sshd_config"; then
+        local configured_kex=$(grep "^KexAlgorithms" "$sshd_config" | cut -d' ' -f2-)
+        if [[ "$configured_kex" == "$allowed_kex" ]]; then
+            log " - [PASS] SSH KexAlgorithms properly configured"
+        else
+            log " - [FAIL] SSH KexAlgorithms misconfigured (found: $configured_kex)"
+        fi
+    else
+        log " - [FAIL] SSH KexAlgorithms not explicitly configured"
+    fi
+}
+
+# Call the enhanced SSH checks
+check_ssh_ciphers
 
 log "\nChapter 5 audit complete. Results appended to $RESULT_FILE"
 
@@ -934,3 +1043,142 @@ update_changelog() {
     mkdir -p "$(dirname "$CHANGELOG_FILE")"
     echo -e "\n## ${version} (${date})\n${changes}" >> "$CHANGELOG_FILE"
 }
+
+log_section "5.2.4 - Audit File Access Controls"
+
+# Check audit log directory permissions
+check_audit_directory() {
+    local audit_dir="/var/log/audit"
+    if [ -d "$audit_dir" ]; then
+        local perms=$(stat -c "%a" "$audit_dir")
+        local owner=$(stat -c "%U" "$audit_dir")
+        local group=$(stat -c "%G" "$audit_dir")
+        
+        if [ "$perms" = "750" ] && [ "$owner" = "root" ] && [ "$group" = "root" ]; then
+            log " - [PASS] Audit log directory has correct permissions (750) and ownership"
+        else
+            log " - [FAIL] Audit log directory has incorrect permissions/ownership (found: $perms $owner:$group)"
+        fi
+    else
+        log " - [FAIL] Audit log directory does not exist"
+    fi
+}
+
+# Check audit log file permissions
+check_audit_files() {
+    local audit_dir="/var/log/audit"
+    if [ -d "$audit_dir" ]; then
+        find "$audit_dir" -type f -name "audit*" | while read -r file; do
+            local perms=$(stat -c "%a" "$file")
+            local owner=$(stat -c "%U" "$file")
+            local group=$(stat -c "%G" "$file")
+            
+            if [ "$perms" = "640" ] && [ "$owner" = "root" ] && [ "$group" = "root" ]; then
+                log " - [PASS] Audit log file $file has correct permissions"
+            else
+                log " - [FAIL] Audit log file $file has incorrect permissions (found: $perms $owner:$group)"
+            fi
+        done
+    fi
+}
+
+# Check audit tool permissions
+check_audit_tools() {
+    local tools=("/sbin/auditctl" "/sbin/aureport" "/sbin/ausearch" "/sbin/autrace" "/sbin/auditd" "/sbin/augenrules")
+    
+    for tool in "${tools[@]}"; do
+        if [ -f "$tool" ]; then
+            local perms=$(stat -c "%a" "$tool")
+            local owner=$(stat -c "%U" "$tool")
+            local group=$(stat -c "%G" "$tool")
+            
+            if [ "$perms" = "755" ] && [ "$owner" = "root" ] && [ "$group" = "root" ]; then
+                log " - [PASS] Audit tool $tool has correct permissions"
+            else
+                log " - [FAIL] Audit tool $tool has incorrect permissions (found: $perms $owner:$group)"
+            fi
+        else
+            log " - [FAIL] Audit tool $tool not found"
+        fi
+    done
+}
+
+# Run the audit file access checks
+check_audit_directory
+check_audit_files
+check_audit_tools
+
+# Add after initial variable declarations
+MIN_DISK_SPACE=500000  # 500MB in KB
+
+check_disk_space() {
+    local available_space=$(df -k "$RESULT_DIR" | awk 'NR==2 {print $4}')
+    if [ "$available_space" -lt "$MIN_DISK_SPACE" ]; then
+        handle_error "Insufficient disk space. Required: ${MIN_DISK_SPACE}KB, Available: ${available_space}KB" "CRITICAL"
+    fi
+}
+
+# Enhanced error handling with network checks
+check_network_connectivity() {
+    # Test basic network connectivity
+    if ! ping -c 1 8.8.8.8 >/dev/null 2>&1; then
+        handle_error "Network connectivity check failed" "WARNING"
+    fi
+    
+    # Test DNS resolution
+    if ! nslookup redhat.com >/dev/null 2>&1; then
+        handle_error "DNS resolution check failed" "WARNING"
+    fi
+}
+
+# Backup existing results
+backup_existing_results() {
+    if [ -f "$RESULT_FILE" ]; then
+        local backup_file="${RESULT_FILE}.$(date +%Y%m%d_%H%M%S).bak"
+        cp "$RESULT_FILE" "$backup_file" || handle_error "Failed to backup existing results" "WARNING"
+        log "Backed up existing results to $backup_file" "INFO"
+    fi
+}
+
+# Add before main execution
+check_disk_space
+check_network_connectivity
+backup_existing_results
+
+# Enhanced package checking with version verification
+check_package_versions() {
+    local -A required_versions=(
+        ["nftables"]="0.9.3"
+        ["firewalld"]="0.8.2"
+    )
+
+    for pkg in "${!required_versions[@]}"; do
+        local installed_version=$(rpm -q --queryformat '%{VERSION}' "$pkg" 2>/dev/null)
+        local required_version="${required_versions[$pkg]}"
+        
+        if [ -z "$installed_version" ]; then
+            handle_error "Required package not found: $pkg" "CRITICAL"
+        else
+            if ! verify_version "$installed_version" "$required_version"; then
+                handle_error "Package $pkg version mismatch. Required: $required_version, Found: $installed_version" "WARNING"
+            else
+                log "Package $pkg version check passed: $installed_version" "INFO"
+            fi
+        fi
+    done
+}
+
+# Version comparison helper
+verify_version() {
+    local installed=$1
+    local required=$2
+    
+    # Convert versions to comparable integers
+    local installed_num=$(echo "$installed" | awk -F. '{ printf("%d%03d%03d\n", $1,$2,$3); }')
+    local required_num=$(echo "$required" | awk -F. '{ printf("%d%03d%03d\n", $1,$2,$3); }')
+    
+    [ "$installed_num" -ge "$required_num" ]
+}
+
+# Add after the initial package checks
+check_package_versions
