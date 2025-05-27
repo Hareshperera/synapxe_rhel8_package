@@ -117,8 +117,11 @@ log() {
     fi
     
     # Archive logs if file size exceeds limit
-    if [ -f "$RESULT_FILE" ] && [ $(stat -f%z "$RESULT_FILE") -gt 5242880 ]; then # 5MB
-        setup_logging
+    if [ -f "$RESULT_FILE" ]; then
+        file_size=$(stat -f%z "$RESULT_FILE" 2>/dev/null || echo "0")
+        if [ -n "$file_size" ] && [ "$file_size" -gt 5242880 ]; then # 5MB
+            setup_logging
+        fi
     fi
 }
 
@@ -134,7 +137,7 @@ setup_logging() {
             mv "${RESULT_FILE}.$((i-1))" "${RESULT_FILE}.$i"
             
             # Compress logs older than compress_after days
-            if [ "$i" -gt "$compress_after" ] && [ ! -f "${RESULT_FILE}.$i.gz" ]; then
+            if [ -n "$i" ] && [ -n "$compress_after" ] && [ "$i" -gt "$compress_after" ] && [ ! -f "${RESULT_FILE}.$i.gz" ]; then
                 $compress_cmd "${RESULT_FILE}.$i"
             fi
         fi
@@ -192,77 +195,238 @@ generate_html_report() {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Synapxe RHEL 8 Audit Report - SERVER_HOSTNAME</title>
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f1c40f;
+            --info-color: #3498db;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            max-width: 1200px;
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+            color: #2c3e50;
+        }
+        
+        .container {
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
-            background: #f5f5f5;
         }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+        
         .header {
-            background: #2c3e50;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 20px;
-            border-radius: 8px 8px 0 0;
-            margin-bottom: 20px;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 8px;
+            height: 24px;
+            margin: 1rem 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, var(--success-color), #27ae60);
+            height: 100%;
+            border-radius: 8px;
+            transition: width 1s ease-in-out;
+            position: relative;
+        }
+        
+        .progress-label {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .section-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-card h3 {
+            margin: 0 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light-color);
+        }
+        
+        .result-item {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .info {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .pass .status-icon {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .fail .status-icon {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .info .status-icon {
+            background: var(--info-color);
+            color: white;
+        }
+        
+        .warning .status-icon {
+            background: var(--warning-color);
+            color: white;
+        }
+        
         .server-info {
-            background: #34495e;
-            color: white;
-            padding: 15px;
-            border-radius: 4px;
-            margin: 20px 0;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
         }
+        
         .server-info table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
         }
+        
         .server-info th, .server-info td {
-            padding: 8px;
+            padding: 1rem;
             text-align: left;
-            border-bottom: 1px solid #456789;
+            border-bottom: 1px solid var(--light-color);
         }
+        
         .server-info th {
-            color: #bdc3c7;
+            font-weight: 600;
+            color: var(--dark-color);
         }
-        .summary-box {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 15px;
-            margin-bottom: 20px;
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
         }
-        .progress-bar {
-            background: #e9ecef;
-            border-radius: 4px;
-            height: 20px;
-            margin: 10px 0;
-            overflow: hidden;
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .progress-fill {
-            background: #28a745;
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.5s ease-in-out;
+        
+        .metric-card, .section-card {
+            animation: fadeIn 0.5s ease-out forwards;
         }
-        .section {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-        }
-        .pass { color: #28a745; }
-        .fail { color: #dc3545; }
-        .info { color: #17a2b8; }
-        .warning { color: #ffc107; }
     </style>
 </head>
 <body>
@@ -294,20 +458,35 @@ generate_html_report() {
             </table>
         </div>
         
-        <div class="summary-box">
-            <h2>Executive Summary</h2>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: COMPLIANCE_RATE%;"></div>
+        <div class="dashboard">
+            <div class="metric-card">
+                <h3>Total Tests</h3>
+                <div class="metric-value">TOTAL_TESTS</div>
             </div>
-            <p>Compliance Rate: COMPLIANCE_RATE%</p>
-            <table>
-                <tr><th>Metric</th><th>Count</th></tr>
-                <tr><td>Total Tests</td><td>TOTAL_TESTS</td></tr>
-                <tr><td>Passed Tests</td><td>PASSED_TESTS</td></tr>
-                <tr><td>Failed Tests</td><td>FAILED_TESTS</td></tr>
-            </table>
+            <div class="metric-card">
+                <h3>Passed Tests</h3>
+                <div class="metric-value" style="color: var(--success-color)">PASSED_TESTS</div>
+            </div>
+            <div class="metric-card">
+                <h3>Failed Tests</h3>
+                <div class="metric-value" style="color: var(--danger-color)">FAILED_TESTS</div>
+            </div>
+            <div class="metric-card">
+                <h3>Compliance Rate</h3>
+                <div class="metric-value" style="color: var(--primary-color)">COMPLIANCE_RATE%</div>
+            </div>
         </div>
-        <div class="results">
+
+        <div class="progress-container">
+            <h2>Overall Compliance</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: COMPLIANCE_RATE%;">
+                    <span class="progress-label">COMPLIANCE_RATE%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-grid">
 EOF
 
     # Replace placeholders with actual values
@@ -322,17 +501,18 @@ EOF
     sed -i.bak "s/FAILED_TESTS/$failed_tests/g" "$report_file"
     
     # Add test results
+    echo "<div class=\"section-card\">" >> "$report_file"
     while IFS= read -r line; do
         if [[ $line == *"[PASS]"* ]]; then
-            echo "<p class=\"pass\">$line</p>" >> "$report_file"
+            echo "<div class=\"result-item pass\"><span class=\"status-icon\">✓</span>$line</div>" >> "$report_file"
         elif [[ $line == *"[FAIL]"* ]]; then
-            echo "<p class=\"fail\">$line</p>" >> "$report_file"
+            echo "<div class=\"result-item fail\"><span class=\"status-icon\">✗</span>$line</div>" >> "$report_file"
         elif [[ $line == *"[INFO]"* ]]; then
-            echo "<p class=\"info\">$line</p>" >> "$report_file"
+            echo "<div class=\"result-item info\"><span class=\"status-icon\">i</span>$line</div>" >> "$report_file"
         elif [[ $line == *"[WARNING]"* ]]; then
-            echo "<p class=\"warning\">$line</p>" >> "$report_file"
+            echo "<div class=\"result-item warning\"><span class=\"status-icon\">!</span>$line</div>" >> "$report_file"
         elif [[ $line == *"="* ]]; then
-            echo "<h3>$line</h3>" >> "$report_file"
+            echo "</div><div class=\"section-card\"><h3>$line</h3>" >> "$report_file"
         else
             echo "<p>$line</p>" >> "$report_file"
         fi
@@ -340,9 +520,87 @@ EOF
 
     # Close HTML document
     cat >> "$report_file" << 'EOF'
+            </div>
         </div>
-    </div>
-</body>
+        <script>
+            // Add smooth animations for progress bars
+            document.addEventListener('DOMContentLoaded', function() {
+                // Animate progress bars
+                const progressBars = document.querySelectorAll('.progress-fill');
+                progressBars.forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100);
+                });
+
+                // Add hover effects for metric cards
+                const metricCards = document.querySelectorAll('.metric-card');
+                metricCards.forEach(card => {
+                    card.addEventListener('mouseover', function() {
+                        this.style.transform = 'translateY(-5px)';
+                        this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    });
+                    card.addEventListener('mouseout', function() {
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                    });
+                });
+
+                // Add section navigation
+                const sections = document.querySelectorAll('.section-card h3');
+                const nav = document.createElement('div');
+                nav.className = 'section-nav';
+                nav.style.cssText = 'position: fixed; top: 20px; right: 20px; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-height: 80vh; overflow-y: auto; z-index: 1000;';
+                nav.innerHTML = '<h4 style="margin-top: 0;">Quick Navigation</h4>';
+                
+                sections.forEach((section, index) => {
+                    const link = document.createElement('a');
+                    link.href = '#section-' + index;
+                    link.textContent = section.textContent;
+                    link.style.cssText = 'display: block; padding: 0.5rem; color: var(--primary-color); text-decoration: none; font-size: 0.9rem; transition: all 0.2s ease;';
+                    link.addEventListener('mouseover', function() {
+                        this.style.backgroundColor = 'var(--light-color)';
+                        this.style.paddingLeft = '1rem';
+                    });
+                    link.addEventListener('mouseout', function() {
+                        this.style.backgroundColor = 'transparent';
+                        this.style.paddingLeft = '0.5rem';
+                    });
+                    nav.appendChild(link);
+                    
+                    section.id = 'section-' + index;
+                });
+                
+                document.body.appendChild(nav);
+
+                // Add scroll to top button
+                const scrollBtn = document.createElement('button');
+                scrollBtn.textContent = '↑';
+                scrollBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; opacity: 0; transition: opacity 0.3s ease; z-index: 1000;';
+                document.body.appendChild(scrollBtn);
+
+                window.addEventListener('scroll', function() {
+                    scrollBtn.style.opacity = window.scrollY > 500 ? '1' : '0';
+                });
+
+                scrollBtn.addEventListener('click', function() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                // Add smooth scroll for navigation links
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        document.querySelector(this.getAttribute('href')).scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    });
+                });
+            });
+        </script>
+    </body>
 </html>
 EOF
 
@@ -440,6 +698,37 @@ init_cis_mapping() {
     CIS_DESCRIPTIONS["6.2.4"]="Ensure no duplicate UIDs exist"
     CIS_DESCRIPTIONS["6.2.5"]="Ensure no duplicate GIDs exist"
     
+    # Additional missing mappings
+    CIS_DESCRIPTIONS["3.3.2"]="Ensure ICMP redirects are not accepted"
+    CIS_DESCRIPTIONS["3.3.6"]="Ensure source routed packets are not accepted"
+    CIS_DESCRIPTIONS["3.3.7"]="Ensure suspicious packets are logged"
+    CIS_DESCRIPTIONS["3.3.8"]="Ensure reverse path filtering is enabled"
+    CIS_DESCRIPTIONS["3.3.9"]="Ensure TCP SYN Cookies is enabled"
+    CIS_DESCRIPTIONS["3.3.10"]="Ensure IPv6 router advertisements are not accepted"
+    
+    # Network Services
+    CIS_DESCRIPTIONS["2.2.4"]="Ensure CUPS is not installed"
+    CIS_DESCRIPTIONS["2.2.5"]="Ensure DHCP Server is not installed"
+    CIS_DESCRIPTIONS["2.2.6"]="Ensure LDAP server is not installed"
+    CIS_DESCRIPTIONS["2.2.7"]="Ensure NFS is not installed"
+    CIS_DESCRIPTIONS["2.2.8"]="Ensure DNS Server is not installed"
+    CIS_DESCRIPTIONS["2.2.9"]="Ensure FTP Server is not installed"
+    CIS_DESCRIPTIONS["2.2.10"]="Ensure HTTP server is not installed"
+    
+    # System Access, Authentication and Authorization
+    CIS_DESCRIPTIONS["5.2.1"]="Ensure sudo is installed"
+    CIS_DESCRIPTIONS["5.2.2"]="Ensure sudo commands use pty"
+    CIS_DESCRIPTIONS["5.2.3"]="Ensure sudo log file exists"
+    CIS_DESCRIPTIONS["5.2.4"]="Ensure users must provide password for privilege escalation"
+    CIS_DESCRIPTIONS["5.2.5"]="Ensure re-authentication for privilege escalation is not disabled globally"
+    
+    # User Accounts and Environment
+    CIS_DESCRIPTIONS["5.4.1"]="Ensure password expiration is 365 days or less"
+    CIS_DESCRIPTIONS["5.4.2"]="Ensure minimum days between password changes is configured"
+    CIS_DESCRIPTIONS["5.4.3"]="Ensure password expiration warning days is 7 or more"
+    CIS_DESCRIPTIONS["5.4.4"]="Ensure inactive password lock is 30 days or less"
+    CIS_DESCRIPTIONS["5.4.5"]="Ensure all users last password change date is in the past"
+    
     # Initialize all results as "NOT CHECKED"
     for key in "${!CIS_DESCRIPTIONS[@]}"; do
         CIS_RESULTS[$key]="NOT CHECKED"
@@ -485,7 +774,7 @@ generate_cis_report() {
     
     # Calculate compliance percentage
     local compliance_rate=0
-    if [ $total_checks -gt 0 ]; then
+    if [ -n "$total_checks" ] && [ "$total_checks" -gt 0 ]; then
         compliance_rate=$(( (passed_checks * 100) / total_checks ))
     fi
     
@@ -813,6 +1102,58 @@ fi
 # 2.2.1 Ensure ntp is not installed if chronyd is used
 rpm -q ntp > /dev/null && log " - [FAIL] ntp is installed (should use chrony)" || log " - [PASS] ntp is not installed"
 
+# Network Services Checks
+log_section "2.2 - Network Services"
+
+# 2.2.4 Check CUPS
+if ! rpm -q cups &>/dev/null; then
+    record_test_result "2.2.4" "PASS" "CUPS is not installed"
+else
+    record_test_result "2.2.4" "FAIL" "CUPS is installed"
+fi
+
+# 2.2.5 Check DHCP Server
+if ! rpm -q dhcp-server &>/dev/null; then
+    record_test_result "2.2.5" "PASS" "DHCP Server is not installed"
+else
+    record_test_result "2.2.5" "FAIL" "DHCP Server is installed"
+fi
+
+# 2.2.6 Check LDAP Server
+if ! rpm -q openldap-servers &>/dev/null; then
+    record_test_result "2.2.6" "PASS" "LDAP server is not installed"
+else
+    record_test_result "2.2.6" "FAIL" "LDAP server is installed"
+fi
+
+# 2.2.7 Check NFS
+if ! rpm -q nfs-utils &>/dev/null; then
+    record_test_result "2.2.7" "PASS" "NFS is not installed"
+else
+    record_test_result "2.2.7" "FAIL" "NFS is installed"
+fi
+
+# 2.2.8 Check DNS Server
+if ! rpm -q bind &>/dev/null; then
+    record_test_result "2.2.8" "PASS" "DNS Server is not installed"
+else
+    record_test_result "2.2.8" "FAIL" "DNS Server is installed"
+fi
+
+# 2.2.9 Check FTP Server
+if ! rpm -q vsftpd &>/dev/null; then
+    record_test_result "2.2.9" "PASS" "FTP Server is not installed"
+else
+    record_test_result "2.2.9" "FAIL" "FTP Server is installed"
+fi
+
+# 2.2.10 Check HTTP Server
+if ! rpm -q httpd &>/dev/null; then
+    record_test_result "2.2.10" "PASS" "HTTP server is not installed"
+else
+    record_test_result "2.2.10" "FAIL" "HTTP server is installed"
+fi
+
 # 2.3 Remove unnecessary services
 unused_services=(avahi cups dhcpd slapd nfs-server bind vsftpd httpd dovecot smb rpcbind squid snmpd telnet tftp rsync ypserv)
 for svc in "${unused_services[@]}"; do
@@ -833,9 +1174,95 @@ log "\nChapter 2 audit complete. Results appended to $RESULT_FILE"
 
 log_section "Chapter 3 - Network Configuration"
 
-# 3.1 Ensure IP forwarding is disabled
-sysctl net.ipv4.ip_forward | grep -q "0" && log " - [PASS] net.ipv4.ip_forward is 0" || log " - [FAIL] net.ipv4.ip_forward is not 0"
-sysctl net.ipv6.conf.all.forwarding | grep -q "0" && log " - [PASS] net.ipv6.conf.all.forwarding is 0" || log " - [FAIL] net.ipv6.conf.all.forwarding is not 0"
+# 3.3.x Network Kernel Parameters
+log_section "3.3.x - Network Kernel Parameters"
+
+# 3.3.1 Ensure IP forwarding is disabled
+sysctl net.ipv4.ip_forward | grep -q "= 0" && \
+log " - [PASS] [CIS 3.3.1] IP forwarding is disabled" || \
+log " - [FAIL] [CIS 3.3.1] IP forwarding is not disabled"
+record_test_result "3.3.1" "$(sysctl net.ipv4.ip_forward | grep -q '= 0' && echo 'PASS' || echo 'FAIL')" "IP forwarding"
+
+# 3.3.3 Ensure bogus ICMP responses are ignored
+sysctl net.ipv4.icmp_ignore_bogus_error_responses | grep -q "= 1" && \
+log " - [PASS] [CIS 3.3.3] Bogus ICMP responses are ignored" || \
+log " - [FAIL] [CIS 3.3.3] Bogus ICMP responses not ignored"
+record_test_result "3.3.3" "$(sysctl net.ipv4.icmp_ignore_bogus_error_responses | grep -q '= 1' && echo 'PASS' || echo 'FAIL')" "Bogus ICMP responses"
+
+# 3.3.4 Ensure broadcast ICMP requests are ignored
+sysctl net.ipv4.icmp_echo_ignore_broadcasts | grep -q "= 1" && \
+log " - [PASS] [CIS 3.3.4] Broadcast ICMP requests are ignored" || \
+log " - [FAIL] [CIS 3.3.4] Broadcast ICMP requests not ignored"
+record_test_result "3.3.4" "$(sysctl net.ipv4.icmp_echo_ignore_broadcasts | grep -q '= 1' && echo 'PASS' || echo 'FAIL')" "Broadcast ICMP requests"
+
+# 3.3.5 Ensure ICMP redirects are not accepted
+if sysctl net.ipv4.conf.all.accept_redirects | grep -q "= 0" && \
+   sysctl net.ipv4.conf.default.accept_redirects | grep -q "= 0"; then
+    log " - [PASS] [CIS 3.3.5] ICMP redirects are not accepted"
+    record_test_result "3.3.5" "PASS" "ICMP redirects not accepted"
+else
+    log " - [FAIL] [CIS 3.3.5] ICMP redirects acceptance not properly configured"
+    record_test_result "3.3.5" "FAIL" "ICMP redirects improperly configured"
+fi
+
+# 3.3.11 Ensure IPv6 router advertisements are not accepted
+if sysctl net.ipv6.conf.all.accept_ra | grep -q "= 0" && \
+   sysctl net.ipv6.conf.default.accept_ra | grep -q "= 0"; then
+    log " - [PASS] [CIS 3.3.11] IPv6 router advertisements are not accepted"
+    record_test_result "3.3.11" "PASS" "IPv6 router advertisements not accepted"
+else
+    log " - [FAIL] [CIS 3.3.11] IPv6 router advertisements acceptance not properly configured"
+    record_test_result "3.3.11" "FAIL" "IPv6 router advertisements improperly configured"
+fi
+
+# Additional Network Parameter Checks
+log_section "3.3 - Network Parameters"
+
+# 3.3.2 Check ICMP redirects
+if sysctl net.ipv4.conf.all.accept_redirects | grep -q "= 0" && \
+   sysctl net.ipv4.conf.default.accept_redirects | grep -q "= 0"; then
+    record_test_result "3.3.2" "PASS" "ICMP redirects are not accepted"
+else
+    record_test_result "3.3.2" "FAIL" "ICMP redirects are accepted"
+fi
+
+# 3.3.6 Check source routed packets
+if sysctl net.ipv4.conf.all.accept_source_route | grep -q "= 0" && \
+   sysctl net.ipv4.conf.default.accept_source_route | grep -q "= 0"; then
+    record_test_result "3.3.6" "PASS" "Source routed packets are not accepted"
+else
+    record_test_result "3.3.6" "FAIL" "Source routed packets are accepted"
+fi
+
+# 3.3.7 Check suspicious packets logging
+if sysctl net.ipv4.conf.all.log_martians | grep -q "= 1"; then
+    record_test_result "3.3.7" "PASS" "Suspicious packets are logged"
+else
+    record_test_result "3.3.7" "FAIL" "Suspicious packets are not logged"
+fi
+
+# 3.3.8 Check reverse path filtering
+if sysctl net.ipv4.conf.all.rp_filter | grep -q "= 1" && \
+   sysctl net.ipv4.conf.default.rp_filter | grep -q "= 1"; then
+    record_test_result "3.3.8" "PASS" "Reverse path filtering is enabled"
+else
+    record_test_result "3.3.8" "FAIL" "Reverse path filtering is not enabled"
+fi
+
+# 3.3.9 Check TCP SYN Cookies
+if sysctl net.ipv4.tcp_syncookies | grep -q "= 1"; then
+    record_test_result "3.3.9" "PASS" "TCP SYN Cookies is enabled"
+else
+    record_test_result "3.3.9" "FAIL" "TCP SYN Cookies is not enabled"
+fi
+
+# 3.3.10 Check IPv6 router advertisements
+if sysctl net.ipv6.conf.all.accept_ra | grep -q "= 0" && \
+   sysctl net.ipv6.conf.default.accept_ra | grep -q "= 0"; then
+    record_test_result "3.3.10" "PASS" "IPv6 router advertisements are not accepted"
+else
+    record_test_result "3.3.10" "FAIL" "IPv6 router advertisements are accepted"
+fi
 
 # 3.2 Ensure packet redirect sending is disabled
 for intf in all default; do
@@ -923,65 +1350,223 @@ log "\nChapter 4 audit complete. Results appended to $RESULT_FILE"
 
 log_section "Chapter 5 - Access, Authentication, and Authorization"
 
-# 5.1 - SSH Server Configuration
+# 4.2.x - SSH Server Configuration
 sshd_config="/etc/ssh/sshd_config"
 
-# Add at the beginning of the script
-CONFIG_FILE="/etc/synapxe_audit/config.conf"
-
-load_config() {
-    if [ -f "$CONFIG_FILE" ]; then
-        source "$CONFIG_FILE"
-    else
-        log "Warning: Config file not found, using defaults"
-    fi
-}
-
-# Add after error handling function
-recover_and_continue() {
-    local error_msg=$1
-    log "WARNING: $error_msg - continuing with next test"
-    return 0
-}
-
-# Add before test sections
-SKIP_TESTS=()
-
-should_skip_test() {
-    local test_name=$1
-    [[ " ${SKIP_TESTS[@]} " =~ " $test_name " ]] && return 0 || return 1
-}
-
-# Example usage in a test
+# Function to check SSH configuration options
 check_sshd_option() {
     local opt=$1
     local val=$2
+    local cis_id=$3
     if [ ! -f "$sshd_config" ]; then
-        recover_and_continue "SSH config file not found"
+        log " - [FAIL] [CIS $cis_id] SSH config file not found"
         return
     fi
-    grep -Ei "^\s*$opt\s+$val" "$sshd_config" > /dev/null && \
-        log " - [PASS] $opt is set to $val" || \
-        log " - [FAIL] $opt is not set to $val"
+    if grep -Ei "^\s*$opt\s+$val" "$sshd_config" > /dev/null; then
+        log " - [PASS] [CIS $cis_id] $opt is set to $val"
+        record_test_result "$cis_id" "PASS" "$opt is set to $val"
+    else
+        log " - [FAIL] [CIS $cis_id] $opt is not set to $val"
+        record_test_result "$cis_id" "FAIL" "$opt is not set to $val"
+    fi
 }
 
-check_sshd_option "PermitRootLogin" "no"
-check_sshd_option "Protocol" "2"
-check_sshd_option "MaxAuthTries" "4"
-check_sshd_option "IgnoreRhosts" "yes"
-check_sshd_option "HostbasedAuthentication" "no"
-check_sshd_option "PermitEmptyPasswords" "no"
-check_sshd_option "LoginGraceTime" "60"
-check_sshd_option "ClientAliveInterval" "300"
-check_sshd_option "ClientAliveCountMax" "3"
-check_sshd_option "UsePAM" "yes"
+# 4.2.4 Ensure sshd access is configured
+if [ -f "$sshd_config" ]; then
+    if grep -q "^AllowUsers" "$sshd_config" || grep -q "^AllowGroups" "$sshd_config"; then
+        log " - [PASS] [CIS 4.2.4] SSH access control configured"
+        record_test_result "4.2.4" "PASS" "SSH access control configured"
+    else
+        log " - [FAIL] [CIS 4.2.4] SSH access control not configured"
+        record_test_result "4.2.4" "FAIL" "SSH access control not configured"
+    fi
+fi
 
-# 5.2 - Sudo Configuration
-[ -f /etc/sudoers ] && log " - [PASS] /etc/sudoers exists" || log " - [FAIL] /etc/sudoers is missing"
-grep -Eq '^Defaults\s+use_pty' /etc/sudoers && log " - [PASS] sudo uses pty" || log " - [FAIL] sudo does not use pty"
-grep -Eq '^Defaults\s+(log_input|log_output)' /etc/sudoers && log " - [PASS] sudo logs I/O" || log " - [FAIL] sudo does not log I/O"
+# 4.2.6 Ensure sshd Ciphers are configured
+check_sshd_option "Ciphers" "aes256-ctr,aes192-ctr,aes128-ctr" "4.2.6"
 
-# 5.3 - PAM Configuration
+# 4.2.7 Ensure sshd ClientAliveInterval and ClientAliveCountMax
+if [ -f "$sshd_config" ]; then
+    if grep -q "^ClientAliveInterval 300" "$sshd_config" && grep -q "^ClientAliveCountMax 3" "$sshd_config"; then
+        log " - [PASS] [CIS 4.2.7] SSH client alive settings properly configured"
+        record_test_result "4.2.7" "PASS" "Client alive settings configured correctly"
+    else
+        log " - [FAIL] [CIS 4.2.7] SSH client alive settings not properly configured"
+        record_test_result "4.2.7" "FAIL" "Client alive settings not configured correctly"
+    fi
+fi
+
+# 4.2.15 Ensure SSH MaxAuthTries
+check_sshd_option "MaxAuthTries" "10" "4.2.15"
+
+# 4.2.16 Ensure SSH MaxSessions
+check_sshd_option "MaxSessions" "5" "4.2.16"
+
+# 4.2.17 Ensure sshd MaxStartups
+check_sshd_option "MaxStartups" "10:30:60" "4.2.17"
+
+# Additional required SSH checks
+check_sshd_option "PermitRootLogin" "no" "4.2.19"
+check_sshd_option "IgnoreRhosts" "yes" "4.2.10"
+check_sshd_option "HostbasedAuthentication" "no" "4.2.9"
+check_sshd_option "PermitEmptyPasswords" "no" "4.2.18"
+check_sshd_option "LoginGraceTime" "60" "4.2.12"
+check_sshd_option "UsePAM" "yes" "4.2.21"
+
+# System Access and Authentication Checks
+log_section "5.2 - Sudo Configuration"
+
+# 5.2.1 Check sudo installation
+if rpm -q sudo &>/dev/null; then
+    record_test_result "5.2.1" "PASS" "sudo is installed"
+else
+    record_test_result "5.2.1" "FAIL" "sudo is not installed"
+fi
+
+# 5.2.2 Check sudo pty requirement
+if grep -q "^Defaults.*requiretty" /etc/sudoers; then
+    record_test_result "5.2.2" "PASS" "sudo requires tty"
+else
+    record_test_result "5.2.2" "FAIL" "sudo does not require tty"
+fi
+
+# 5.2.3 Check sudo log file
+if grep -q "^Defaults.*logfile=" /etc/sudoers; then
+    record_test_result "5.2.3" "PASS" "sudo log file is configured"
+else
+    record_test_result "5.2.3" "FAIL" "sudo log file is not configured"
+fi
+
+# 5.2.4 Check sudo password requirement
+if ! grep -q "^Defaults.*!authenticate" /etc/sudoers; then
+    record_test_result "5.2.4" "PASS" "sudo requires password for privilege escalation"
+else
+    record_test_result "5.2.4" "FAIL" "sudo password requirement is disabled"
+fi
+
+# 5.2.5 Check sudo re-authentication
+if ! grep -q "^Defaults.*timestamp_timeout=0" /etc/sudoers; then
+    record_test_result "5.2.5" "PASS" "sudo re-authentication is not disabled"
+else
+    record_test_result "5.2.5" "FAIL" "sudo re-authentication is disabled"
+fi
+
+# User Account Checks
+log_section "5.4 - User Accounts and Environment"
+
+# 5.4.1 Check password expiration
+max_days=$(grep "^PASS_MAX_DAYS" /etc/login.defs | awk '{print $2}')
+if [ -n "$max_days" ] && [ "$max_days" -le 365 ]; then
+    record_test_result "5.4.1" "PASS" "Password expiration is $max_days days"
+else
+    record_test_result "5.4.1" "FAIL" "Password expiration exceeds 365 days"
+fi
+
+# 5.4.2 Check minimum password change interval
+min_days=$(grep "^PASS_MIN_DAYS" /etc/login.defs | awk '{print $2}')
+if [ -n "$min_days" ] && [ "$min_days" -ge 1 ]; then
+    record_test_result "5.4.2" "PASS" "Minimum password change interval is $min_days days"
+else
+    record_test_result "5.4.2" "FAIL" "Minimum password change interval not properly configured"
+fi
+
+# 5.4.3 Check password warning period
+warn_days=$(grep "^PASS_WARN_AGE" /etc/login.defs | awk '{print $2}')
+if [ -n "$warn_days" ] && [ "$warn_days" -ge 7 ]; then
+    record_test_result "5.4.3" "PASS" "Password warning period is $warn_days days"
+else
+    record_test_result "5.4.3" "FAIL" "Password warning period is less than 7 days"
+fi
+
+# 5.4.4 Check inactive password lock
+inactive_days=$(useradd -D | grep INACTIVE | cut -d= -f2)
+if [ -n "$inactive_days" ] && [ "$inactive_days" -le 30 ]; then
+    record_test_result "5.4.4" "PASS" "Inactive password lock is $inactive_days days"
+else
+    record_test_result "5.4.4" "FAIL" "Inactive password lock exceeds 30 days"
+fi
+
+# 5.4.5 Check password change dates
+future_date=$(date +%s)
+while IFS=: read -r user _ _ _ _ _ _; do
+    if [ "$user" != "root" ] && [ -n "$user" ]; then
+        change_date=$(chage -l "$user" | grep "Last password change" | cut -d: -f2-)
+        change_epoch=$(date -d "$change_date" +%s 2>/dev/null)
+        if [ -n "$change_epoch" ] && [ "$change_epoch" -le "$future_date" ]; then
+            record_test_result "5.4.5" "PASS" "Password change date for $user is in the past"
+        else
+            record_test_result "5.4.5" "FAIL" "Password change date for $user is in the future"
+        fi
+    fi
+done < /etc/passwd
+
+# 4.4.x - PAM and Authentication Configuration
+log_section "4.4.x - PAM and Authentication"
+
+# 4.4.1.1 Ensure latest version of pam is installed
+if rpm -q pam >/dev/null 2>&1; then
+    current_pam_version=$(rpm -q pam | cut -d'-' -f2)
+    latest_pam_version=$(dnf list pam 2>/dev/null | awk '/pam\./ {print $2}' | head -1)
+    if [ "$current_pam_version" = "$latest_pam_version" ]; then
+        log " - [PASS] [CIS 4.4.1.1] PAM is at latest version ($current_pam_version)"
+        record_test_result "4.4.1.1" "PASS" "PAM is at latest version"
+    else
+        log " - [FAIL] [CIS 4.4.1.1] PAM needs update (current: $current_pam_version, latest: $latest_pam_version)"
+        record_test_result "4.4.1.1" "FAIL" "PAM needs update"
+    fi
+else
+    log " - [FAIL] [CIS 4.4.1.1] PAM is not installed"
+    record_test_result "4.4.1.1" "FAIL" "PAM is not installed"
+fi
+
+# 4.4.1.2 Ensure latest version of authselect is installed
+if rpm -q authselect >/dev/null 2>&1; then
+    current_authselect_version=$(rpm -q authselect | cut -d'-' -f2)
+    latest_authselect_version=$(dnf list authselect 2>/dev/null | awk '/authselect\./ {print $2}' | head -1)
+    if [ "$current_authselect_version" = "$latest_authselect_version" ]; then
+        log " - [PASS] [CIS 4.4.1.2] Authselect is at latest version ($current_authselect_version)"
+        record_test_result "4.4.1.2" "PASS" "Authselect is at latest version"
+    else
+        log " - [FAIL] [CIS 4.4.1.2] Authselect needs update (current: $current_authselect_version, latest: $latest_authselect_version)"
+        record_test_result "4.4.1.2" "FAIL" "Authselect needs update"
+    fi
+else
+    log " - [FAIL] [CIS 4.4.1.2] Authselect is not installed"
+    record_test_result "4.4.1.2" "FAIL" "Authselect is not installed"
+fi
+
+# 4.4.2.1 Ensure active authselect profile includes pam modules
+if command -v authselect >/dev/null 2>&1; then
+    current_profile=$(authselect current -r 2>/dev/null)
+    if [ -n "$current_profile" ] && authselect check >/dev/null 2>&1; then
+        if grep -q "pam_pwquality.so" "/etc/pam.d/system-auth" && \
+           grep -q "pam_faillock.so" "/etc/pam.d/system-auth" && \
+           grep -q "pam_unix.so" "/etc/pam.d/system-auth"; then
+            log " - [PASS] [CIS 4.4.2.1] Authselect profile includes required PAM modules"
+            record_test_result "4.4.2.1" "PASS" "Required PAM modules present"
+        else
+            log " - [FAIL] [CIS 4.4.2.1] Authselect profile missing required PAM modules"
+            record_test_result "4.4.2.1" "FAIL" "Missing required PAM modules"
+        fi
+    else
+        log " - [FAIL] [CIS 4.4.2.1] No valid authselect profile active"
+        record_test_result "4.4.2.1" "FAIL" "No valid authselect profile"
+    fi
+fi
+
+# 4.4.2.2 Ensure pam_faillock module is enabled
+if [ -f "/etc/pam.d/system-auth" ] && [ -f "/etc/pam.d/password-auth" ]; then
+    if grep -q "pam_faillock.so" "/etc/pam.d/system-auth" && \
+       grep -q "pam_faillock.so" "/etc/pam.d/password-auth"; then
+        log " - [PASS] [CIS 4.4.2.2] pam_faillock module is enabled"
+        record_test_result "4.4.2.2" "PASS" "pam_faillock module enabled"
+    else
+        log " - [FAIL] [CIS 4.4.2.2] pam_faillock module is not enabled"
+        record_test_result "4.4.2.2" "FAIL" "pam_faillock module not enabled"
+    fi
+fi
+
+# Additional PAM checks
 grep -E '^password\s+sufficient\s+pam_unix.so.*remember=' /etc/pam.d/system-auth && log " - [PASS] PAM password history enforced" || log " - [FAIL] PAM password history not enforced"
 
 # 5.4 - User Account Policies
@@ -1130,7 +1715,7 @@ show_help() {
 JSON_OUTPUT=false
 QUIET_MODE=false
 
-while [[ $# -gt 0 ]]; do
+while (( $# > 0 )); do
     case $1 in
         -j|--json) JSON_OUTPUT=true ;;
         -q|--quiet) QUIET_MODE=true ;;
