@@ -112,7 +112,7 @@ setup_logging() {
             mv "${RESULT_FILE}.$((i-1))" "${RESULT_FILE}.$i"
             
             # Compress logs older than compress_after days
-            if [ $i -gt $compress_after ] && [ ! -f "${RESULT_FILE}.$i.gz" ]; then
+            if [ "$i" -gt "$compress_after" ] && [ ! -f "${RESULT_FILE}.$i.gz" ]; then
                 $compress_cmd "${RESULT_FILE}.$i"
             fi
         fi
