@@ -9,6 +9,46 @@ handle_error() {
     exit $exit_code
 }
 
+# Enhanced error handling and recovery
+trap 'cleanup' EXIT
+trap 'handle_interrupt' INT TERM
+
+cleanup() {
+    local exit_code=$?
+    # Clean up temporary files
+    [ -f "${TEMP_FILE:-}" ] && rm -f "$TEMP_FILE"
+    # Archive incomplete results if they exist
+    [ -f "${RESULT_FILE:-}" ] && mv "$RESULT_FILE" "${RESULT_FILE}.incomplete"
+    exit $exit_code
+}
+
+handle_interrupt() {
+    echo "\nScript interrupted. Cleaning up..." >&2
+    cleanup
+}
+
+handle_error() {
+    local exit_code=$?
+    local error_msg=$1
+    local severity=${2:-"ERROR"}
+    
+    case $severity in
+        "CRITICAL")
+            echo "Critical Error: $error_msg (Exit code: $exit_code)" >&2
+            cleanup
+            exit $exit_code
+            ;;
+        "WARNING")
+            echo "Warning: $error_msg" >&2
+            return 1
+            ;;
+        "ERROR")
+            echo "Error: $error_msg (Exit code: $exit_code)" >&2
+            return $exit_code
+            ;;
+    esac
+}
+
 # Check for root privileges
 [ "$(id -u)" -eq 0 ] || handle_error "This script must be run as root"
 
@@ -36,12 +76,34 @@ done
 > "$RESULT_FILE" || handle_error "Failed to create results file"
 
 # Enhanced logging functions with timestamps and severity levels
+# Enhanced logging with rotation
+setup_logging() {
+    local max_logs=5
+    local compress_after=7 # days
+
+    # Rotate existing logs
+    for ((i=max_logs; i>0; i--)); do
+        if [ -f "${RESULT_FILE}.$((i-1))" ]; then
+            mv "${RESULT_FILE}.$((i-1))" "${RESULT_FILE}.$i"
+        fi
+    done
+
+    # Compress old logs
+    find "$RESULT_DIR" -name "*.txt.*" -mtime +$compress_after -exec gzip {} \;
+}
+
 log() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local severity=${2:-INFO}  # Default severity level
-    local indent="    "  # For better readability
+    local severity=${2:-INFO}
+    local indent="    "
+    local log_entry="[${timestamp}] [${severity}] ${indent}${1}"
     
-    printf '[%s] [%-7s] %s%s\n' "$timestamp" "$severity" "$indent" "$1" | tee -a "$RESULT_FILE"
+    echo "$log_entry" | tee -a "$RESULT_FILE"
+    
+    # Archive logs if file size exceeds limit
+    if [ -f "$RESULT_FILE" ] && [ $(stat -f%z "$RESULT_FILE") -gt 5242880 ]; then # 5MB
+        setup_logging
+    fi
 }
 
 log_section() {
@@ -604,20 +666,29 @@ generate_summary() {
 # Add after the initial variable declarations
 PARALLEL_JOBS=4  # Adjust based on system capabilities
 
-run_parallel_checks() {
-    local tests=($@)
-    local job_count=0
+# Performance optimizations
+PARALLEL_JOBS=4
+CACHE_DIR="${RESULT_DIR}/cache"
 
-    for test in "${tests[@]}"; do
-        eval "$test" &
-        ((job_count++))
-        
-        if ((job_count >= PARALLEL_JOBS)); then
-            wait
-            job_count=0
-        fi
+run_parallel_checks() {
+    local checks=($@)
+    local pids=()
+    
+    mkdir -p "$CACHE_DIR"
+    
+    # Run checks in parallel
+    for ((i=0; i<${#checks[@]}; i+=PARALLEL_JOBS)); do
+        for ((j=i; j<i+PARALLEL_JOBS && j<${#checks[@]}; j++)); do
+            ${checks[j]} > "${CACHE_DIR}/check_${j}.tmp" & pids+=($!)
+        done
+        wait ${pids[@]}
     done
-    wait
+    
+    # Collect results
+    for ((i=0; i<${#checks[@]}; i++)); do
+        cat "${CACHE_DIR}/check_${i}.tmp"
+        rm "${CACHE_DIR}/check_${i}.tmp"
+    done
 }
 
 # Add after the log functions
@@ -771,4 +842,113 @@ restore_from_checkpoint() {
         return 0
     fi
     return 1
+}
+
+# Enhanced security features
+generate_report_signature() {
+    local report_file=$1
+    local signature_file="${report_file}.sig"
+    
+    # Generate SHA256 checksum
+    sha256sum "$report_file" > "${report_file}.sha256"
+    
+    # Create audit trail
+    cat >> "${RESULT_DIR}/audit_trail.log" << EOF
+Report Generated: $(date '+%Y-%m-%d %H:%M:%S')
+Executed by: $(whoami)
+Hostname: $(hostname)
+Checksum: $(cat "${report_file}.sha256")
+EOF
+}
+
+# Enhanced reporting
+generate_executive_summary() {
+    local report_file=$1
+    
+    # Calculate trends if historical data exists
+    local trend_data=""
+    if [ -f "${RESULT_DIR}/historical_data.json" ]; then
+        trend_data=$(calculate_trends)
+    fi
+    
+    # Generate remediation suggestions
+    local remediation_data=$(generate_remediation_suggestions)
+    
+    # Create executive summary
+    cat > "${report_file}.summary" << EOF
+Executive Summary
+================
+
+Overall Compliance: ${compliance_rate}%
+Trend Analysis: ${trend_data}
+
+Key Findings:
+${remediation_data}
+EOF
+}
+
+# Enhanced compatibility checks
+check_compatibility() {
+    # Check RHEL version
+    local rhel_version=$(rpm -q --queryformat '%{VERSION}' redhat-release)
+    if [[ ! "$rhel_version" =~ ^8\. ]]; then
+        handle_error "This script requires RHEL 8.x (found version $rhel_version)" "CRITICAL"
+    fi
+    
+    # Check shell environment
+    if [ -z "$BASH_VERSION" ]; then
+        handle_error "This script requires bash shell" "CRITICAL"
+    fi
+    
+    # Check for virtualization
+    if systemctl status 2>/dev/null | grep -q 'virtualization'; then
+        log "Running in virtualized environment" "INFO"
+    fi
+}
+
+# Enhanced testing framework
+run_self_test() {
+    local test_dir="${RESULT_DIR}/tests"
+    mkdir -p "$test_dir"
+    
+    # Test cases
+    local tests=(
+        test_file_permissions
+        test_logging
+        test_error_handling
+        test_report_generation
+    )
+    
+    log "Starting self-test" "INFO"
+    for test in "${tests[@]}"; do
+        if $test; then
+            log "Test passed: $test" "PASS"
+        else
+            log "Test failed: $test" "FAIL"
+        fi
+    done
+}
+# Version control and maintenance
+VERSION="1.0.0"
+LAST_UPDATE="2024-01-20"
+CHANGELOG_FILE="${RESULT_DIR}/changelog.md"
+
+show_version() {
+    cat << EOF
+Synapxe RHEL 8 Audit Script v${VERSION}
+Last Updated: ${LAST_UPDATE}
+
+Changelog:
+$(cat "$CHANGELOG_FILE" 2>/dev/null || echo "No changelog available")
+EOF
+}
+
+# Update changelog
+update_changelog() {
+    local version=$1
+    local changes=$2
+    local date=$(date '+%Y-%m-%d')
+    
+    mkdir -p "$(dirname "$CHANGELOG_FILE")"
+    echo -e "\n## ${version} (${date})\n${changes}" >> "$CHANGELOG_FILE"
 }
