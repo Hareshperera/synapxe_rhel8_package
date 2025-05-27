@@ -20,10 +20,16 @@ RESULT_FILE="${RESULT_DIR}/synapxe_rhel8_audit_results.txt"
 mkdir -p "${RESULT_DIR}" || handle_error "Failed to create results directory"
 chmod 750 "${RESULT_DIR}" || handle_error "Failed to set directory permissions"
 
+# Check required packages
+REQUIRED_PACKAGES=("nftables" "firewalld")
+for pkg in "${REQUIRED_PACKAGES[@]}"; do
+    rpm -q "$pkg" >/dev/null 2>&1 || handle_error "Required package not found: $pkg. Please install using 'dnf install $pkg'"
+done
+
 # Check required commands
 REQUIRED_COMMANDS=("rpm" "systemctl" "grep" "awk" "stat" "sysctl" "nft" "firewall-cmd")
 for cmd in "${REQUIRED_COMMANDS[@]}"; do
-    command -v "$cmd" >/dev/null 2>&1 || handle_error "Required command not found: $cmd"
+    command -v "$cmd" >/dev/null 2>&1 || handle_error "Required command not found: $cmd. Please ensure all required packages are installed."
 done
 
 # Initialize results file
