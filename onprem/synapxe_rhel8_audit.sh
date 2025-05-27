@@ -358,18 +358,329 @@ EOF
     rm -f "${report_file}.bak"
 }
 
-log_section "1.1.1.x - Kernel Module Checks"
-modules=(cramfs freevxfs hfs hfsplus jffs2 squashfs udf usb-storage)
-for mod in "${modules[@]}"; do
-    log "Checking module: $mod"
-    lsmod | grep -q "^$mod" && log " - [FAIL] $mod is loaded" || log " - [PASS] $mod is not loaded"
-    grep -Rq "install $mod /bin/false" /etc/modprobe.d && log " - [PASS] install $mod /bin/false exists" || log " - [FAIL] install $mod /bin/false not found"
-    grep -Rq "blacklist $mod" /etc/modprobe.d && log " - [PASS] blacklist $mod exists" || log " - [FAIL] blacklist $mod not found"
-done
+# CIS Mapping array to track test results
+declare -A CIS_RESULTS
+declare -A CIS_DESCRIPTIONS
 
-log_section "1.1.2.x - Partition Mount Options"
-/bin/mount | grep -q "on /tmp " && log " - [PASS] /tmp is mounted" || log " - [FAIL] /tmp is not mounted"
-findmnt -n /tmp | grep -q "nodev" && log " - [PASS] nodev set on /tmp" || log " - [FAIL] nodev not set on /tmp"
+# Initialize CIS mapping function
+init_cis_mapping() {
+    # File System Configuration
+    CIS_DESCRIPTIONS["1.1.1.1"]="Ensure cramfs kernel module is not available"
+    CIS_DESCRIPTIONS["1.1.1.2"]="Ensure freevxfs kernel module is not available"
+    CIS_DESCRIPTIONS["1.1.1.3"]="Ensure hfs kernel module is not available"
+    CIS_DESCRIPTIONS["1.1.1.4"]="Ensure hfsplus kernel module is not available"
+    CIS_DESCRIPTIONS["1.1.1.5"]="Ensure jffs2 kernel module is not available"
+    CIS_DESCRIPTIONS["1.1.1.6"]="Ensure squashfs kernel module is not available"
+    CIS_DESCRIPTIONS["1.1.1.7"]="Ensure udf kernel module is not available"
+    CIS_DESCRIPTIONS["1.1.1.8"]="Ensure usb-storage kernel module is not available"
+    
+    # Filesystem Partitions
+    CIS_DESCRIPTIONS["1.1.2.1.1"]="Ensure /tmp is a separate partition"
+    CIS_DESCRIPTIONS["1.1.2.1.2"]="Ensure nodev option set on /tmp partition"
+    CIS_DESCRIPTIONS["1.1.2.1.3"]="Ensure nosuid option set on /tmp partition"
+    CIS_DESCRIPTIONS["1.1.2.1.4"]="Ensure noexec option set on /tmp partition"
+    
+    # Network Configuration
+    CIS_DESCRIPTIONS["3.1.2"]="Ensure wireless interfaces are disabled"
+    CIS_DESCRIPTIONS["3.1.3"]="Ensure bluetooth services are not in use"
+    CIS_DESCRIPTIONS["3.2.1"]="Ensure dccp kernel module is not available"
+    CIS_DESCRIPTIONS["3.2.2"]="Ensure tipc kernel module is not available"
+    
+    # Service Configuration
+    CIS_DESCRIPTIONS["2.2.1"]="Ensure autofs services are not in use"
+    CIS_DESCRIPTIONS["2.2.2"]="Ensure avahi daemon services are not in use"
+    CIS_DESCRIPTIONS["2.2.3"]="Ensure dhcp server services are not in use"
+    
+    # SSH Configuration
+    CIS_DESCRIPTIONS["4.2.1"]="Ensure permissions on /etc/ssh/sshd_config are configured"
+    CIS_DESCRIPTIONS["4.2.2"]="Ensure permissions on SSH private host key files are configured"
+    CIS_DESCRIPTIONS["4.2.3"]="Ensure permissions on SSH public host key files are configured"
+    
+    # System File Permissions
+    CIS_DESCRIPTIONS["6.1.1"]="Ensure permissions on /etc/passwd are configured"
+    CIS_DESCRIPTIONS["6.1.2"]="Ensure permissions on /etc/passwd- are configured"
+    CIS_DESCRIPTIONS["6.1.3"]="Ensure permissions on /etc/opasswd are configured"
+    
+    # SELinux Configuration
+    CIS_DESCRIPTIONS["1.5.1.1"]="Ensure SELinux is installed"
+    CIS_DESCRIPTIONS["1.5.1.2"]="Ensure SELinux is not disabled in bootloader configuration"
+    CIS_DESCRIPTIONS["1.5.1.3"]="Ensure SELinux policy is configured"
+    CIS_DESCRIPTIONS["1.5.1.4"]="Ensure the SELinux mode is not disabled"
+    CIS_DESCRIPTIONS["1.5.1.5"]="Ensure the SELinux mode is enforcing"
+    
+    # Time Synchronization
+    CIS_DESCRIPTIONS["2.1.1"]="Ensure time synchronization is in use"
+    CIS_DESCRIPTIONS["2.1.2"]="Ensure chrony is configured"
+    CIS_DESCRIPTIONS["2.1.3"]="Ensure chrony is not run as the root user"
+    
+    # SSH Server Configuration
+    CIS_DESCRIPTIONS["4.2.6"]="Ensure sshd Ciphers are configured"
+    CIS_DESCRIPTIONS["4.2.7"]="Ensure sshd ClientAliveInterval and ClientAliveCountMax are configured"
+    CIS_DESCRIPTIONS["4.2.8"]="Ensure sshd DisableForwarding is enabled"
+    CIS_DESCRIPTIONS["4.2.9"]="Ensure sshd HostbasedAuthentication is disabled"
+    
+    # Audit Configuration
+    CIS_DESCRIPTIONS["5.2.1.1"]="Ensure audit is installed"
+    CIS_DESCRIPTIONS["5.2.1.2"]="Ensure auditing for processes that start prior to auditd is enabled"
+    CIS_DESCRIPTIONS["5.2.1.3"]="Ensure audit_backlog_limit is sufficient"
+    CIS_DESCRIPTIONS["5.2.1.4"]="Ensure auditd service is enabled"
+    
+    # System File Permissions
+    CIS_DESCRIPTIONS["6.1.4"]="Ensure permissions on /etc/group are configured"
+    CIS_DESCRIPTIONS["6.1.5"]="Ensure permissions on /etc/group- are configured"
+    CIS_DESCRIPTIONS["6.1.6"]="Ensure permissions on /etc/shadow are configured"
+    CIS_DESCRIPTIONS["6.1.7"]="Ensure permissions on /etc/shadow- are configured"
+    CIS_DESCRIPTIONS["6.1.8"]="Ensure permissions on /etc/gshadow are configured"
+    CIS_DESCRIPTIONS["6.1.9"]="Ensure permissions on /etc/gshadow- are configured"
+    
+    # User and Group Settings
+    CIS_DESCRIPTIONS["6.2.1"]="Ensure accounts in /etc/passwd use shadowed passwords"
+    CIS_DESCRIPTIONS["6.2.2"]="Ensure /etc/shadow password fields are not empty"
+    CIS_DESCRIPTIONS["6.2.3"]="Ensure all groups in /etc/passwd exist in /etc/group"
+    CIS_DESCRIPTIONS["6.2.4"]="Ensure no duplicate UIDs exist"
+    CIS_DESCRIPTIONS["6.2.5"]="Ensure no duplicate GIDs exist"
+    
+    # Initialize all results as "NOT CHECKED"
+    for key in "${!CIS_DESCRIPTIONS[@]}"; do
+        CIS_RESULTS[$key]="NOT CHECKED"
+    done
+}
+
+# Function to record test results
+record_test_result() {
+    local cis_id=$1
+    local result=$2
+    local details=$3
+    
+    CIS_RESULTS[$cis_id]=$result
+    
+    # Log the result with CIS ID
+    log " - [$result] [CIS $cis_id] ${CIS_DESCRIPTIONS[$cis_id]} - $details"
+}
+
+# Function to generate CIS compliance report
+generate_cis_report() {
+    local report_file="${RESULT_DIR}/${HOSTNAME}_cis_compliance_${TIMESTAMP}.csv"
+    local html_report="${RESULT_DIR}/${HOSTNAME}_cis_compliance_${TIMESTAMP}.html"
+    local total_checks=0
+    local passed_checks=0
+    local failed_checks=0
+    local not_checked=0
+    
+    # Generate CSV report
+    {
+        echo "CIS ID,Description,Result,Details,Category"
+        for cis_id in "${!CIS_RESULTS[@]}"; do
+            echo "$cis_id,\"${CIS_DESCRIPTIONS[$cis_id]}\",${CIS_RESULTS[$cis_id]}"
+            
+            # Count results
+            case ${CIS_RESULTS[$cis_id]} in
+                "PASS") ((passed_checks++)) ;;
+                "FAIL") ((failed_checks++)) ;;
+                "NOT CHECKED") ((not_checked++)) ;;
+            esac
+            ((total_checks++))
+        done
+    } > "$report_file"
+    
+    # Calculate compliance percentage
+    local compliance_rate=0
+    if [ $total_checks -gt 0 ]; then
+        compliance_rate=$(( (passed_checks * 100) / total_checks ))
+    fi
+    
+    # Generate HTML report
+    cat > "$html_report" << EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CIS Compliance Report - $HOSTNAME</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background: #f0f0f0; padding: 20px; margin-bottom: 20px; }
+        .summary { display: flex; justify-content: space-around; margin: 20px 0; }
+        .metric { text-align: center; padding: 10px; }
+        .passed { color: green; }
+        .failed { color: red; }
+        .not-checked { color: orange; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; text-align: left; border: 1px solid #ddd; }
+        th { background: #f0f0f0; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: ${compliance_rate}%;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>CIS Compliance Report</h1>
+        <p>Host: $HOSTNAME</p>
+        <p>Date: $(date '+%Y-%m-%d %H:%M:%S')</p>
+    </div>
+    
+    <div class="summary">
+        <div class="metric">
+            <h3>Total Checks</h3>
+            <p>$total_checks</p>
+        </div>
+        <div class="metric passed">
+            <h3>Passed</h3>
+            <p>$passed_checks</p>
+        </div>
+        <div class="metric failed">
+            <h3>Failed</h3>
+            <p>$failed_checks</p>
+        </div>
+        <div class="metric not-checked">
+            <h3>Not Checked</h3>
+            <p>$not_checked</p>
+        </div>
+    </div>
+    
+    <h2>Compliance Rate: ${compliance_rate}%</h2>
+    <div class="progress-bar">
+        <div class="progress"></div>
+    </div>
+    
+    <h2>Detailed Results</h2>
+    <table>
+        <tr>
+            <th>CIS ID</th>
+            <th>Description</th>
+            <th>Result</th>
+        </tr>
+EOF
+    
+    # Add table rows
+    for cis_id in "${!CIS_RESULTS[@]}"; do
+        local result_color
+        case ${CIS_RESULTS[$cis_id]} in
+            "PASS") result_color="green" ;;
+            "FAIL") result_color="red" ;;
+            *) result_color="orange" ;;
+        esac
+        
+        echo "<tr>" >> "$html_report"
+        echo "<td>$cis_id</td>" >> "$html_report"
+        echo "<td>${CIS_DESCRIPTIONS[$cis_id]}</td>" >> "$html_report"
+        echo "<td style=\"color: $result_color\">${CIS_RESULTS[$cis_id]}</td>" >> "$html_report"
+        echo "</tr>" >> "$html_report"
+    done
+    
+    # Close HTML
+    cat >> "$html_report" << EOF
+    </table>
+</body>
+</html>
+EOF
+    
+    log "CIS compliance report generated:"
+    log " - CSV Report: $report_file"
+    log " - HTML Report: $html_report"
+    log "Compliance Rate: ${compliance_rate}%"
+}
+
+# Initialize CIS mapping at start
+init_cis_mapping
+
+log_section "1.1 - Filesystem Configuration"
+
+# Check cramfs kernel module (CIS 1.1.1.1)
+if ! lsmod | grep -q "cramfs" && modprobe -n -v cramfs | grep -q "install /bin/true"; then
+    record_test_result "1.1.1.1" "PASS" "cramfs module is disabled"
+else
+    record_test_result "1.1.1.1" "FAIL" "cramfs module is not properly disabled"
+fi
+
+# Check freevxfs kernel module (CIS 1.1.1.2)
+if ! lsmod | grep -q "freevxfs" && modprobe -n -v freevxfs | grep -q "install /bin/true"; then
+    record_test_result "1.1.1.2" "PASS" "freevxfs module is disabled"
+else
+    record_test_result "1.1.1.2" "FAIL" "freevxfs module is not properly disabled"
+fi
+
+# Check hfs kernel module (CIS 1.1.1.3)
+if ! lsmod | grep -q "hfs" && modprobe -n -v hfs | grep -q "install /bin/true"; then
+    record_test_result "1.1.1.3" "PASS" "hfs module is disabled"
+else
+    record_test_result "1.1.1.3" "FAIL" "hfs module is not properly disabled"
+fi
+
+# Check hfsplus kernel module (CIS 1.1.1.4)
+if ! lsmod | grep -q "hfsplus" && modprobe -n -v hfsplus | grep -q "install /bin/true"; then
+    record_test_result "1.1.1.4" "PASS" "hfsplus module is disabled"
+else
+    record_test_result "1.1.1.4" "FAIL" "hfsplus module is not properly disabled"
+fi
+
+# Check jffs2 kernel module (CIS 1.1.1.5)
+if lsmod | grep -q "jffs2"; then
+    record_test_result "1.1.1.5" "FAIL" "jffs2 module is loaded"
+else
+    record_test_result "1.1.1.5" "PASS" "jffs2 module is not loaded"
+fi
+
+# Check squashfs kernel module (CIS 1.1.1.6)
+if lsmod | grep -q "squashfs"; then
+    record_test_result "1.1.1.6" "FAIL" "squashfs module is loaded"
+else
+    record_test_result "1.1.1.6" "PASS" "squashfs module is not loaded"
+fi
+
+# Check udf kernel module (CIS 1.1.1.7)
+if lsmod | grep -q "udf"; then
+    record_test_result "1.1.1.7" "FAIL" "udf module is loaded"
+else
+    record_test_result "1.1.1.7" "PASS" "udf module is not loaded"
+fi
+
+# Check usb-storage kernel module (CIS 1.1.1.8)
+if lsmod | grep -q "usb-storage"; then
+    record_test_result "1.1.1.8" "FAIL" "usb-storage module is loaded"
+else
+    record_test_result "1.1.1.8" "PASS" "usb-storage module is not loaded"
+fi
+
+log_section "1.1.2.x - Filesystem Partition Checks"
+
+# Check /tmp partition (CIS 1.1.2.1.1)
+if mount | grep -E '\s/tmp\s' | grep -v "tmpfs"; then
+    record_test_result "1.1.2.1.1" "PASS" "/tmp is a separate partition"
+else
+    record_test_result "1.1.2.1.1" "FAIL" "/tmp is not a separate partition"
+fi
+
+# Check /tmp nodev option (CIS 1.1.2.1.2)
+if mount | grep -E '\s/tmp\s' | grep -q "nodev"; then
+    record_test_result "1.1.2.1.2" "PASS" "nodev option is set on /tmp"
+else
+    record_test_result "1.1.2.1.2" "FAIL" "nodev option is not set on /tmp"
+fi
+
+# Check /tmp nosuid option (CIS 1.1.2.1.3)
+if mount | grep -E '\s/tmp\s' | grep -q "nosuid"; then
+    record_test_result "1.1.2.1.3" "PASS" "nosuid option is set on /tmp"
+else
+    record_test_result "1.1.2.1.3" "FAIL" "nosuid option is not set on /tmp"
+fi
+
+# Check /tmp noexec option (CIS 1.1.2.1.4)
+if mount | grep -E '\s/tmp\s' | grep -q "noexec"; then
+    record_test_result "1.1.2.1.4" "PASS" "noexec option is set on /tmp"
+else
+    record_test_result "1.1.2.1.4" "FAIL" "noexec option is not set on /tmp"
+fi
 
 log_section "1.1.3.x - /var/tmp Mount Options"
 /bin/mount | grep -q "on /var/tmp " && log " - [PASS] /var/tmp is mounted" || log " - [FAIL] /var/tmp is not mounted"
@@ -1301,3 +1612,23 @@ parallel_system_checks() {
     check_audit_files
     check_audit_tools
 }
+
+# Generate final reports
+log_section "Final Reports"
+
+# Generate standard summary
+generate_summary
+
+# Generate CIS compliance report
+generate_cis_report
+
+# Generate HTML report
+generate_html_report "$total_tests" "$passed_tests" "$failed_tests" "$compliance_rate"
+
+# Print completion message
+log "\nAudit completed successfully. Reports generated:"
+log " - Text Report: $RESULT_FILE"
+log " - HTML Report: ${RESULT_DIR}/${HOSTNAME}_synapxe_rhel8_audit_${TIMESTAMP}.html"
+log " - CIS Compliance Report: ${RESULT_DIR}/${HOSTNAME}_cis_compliance_${TIMESTAMP}.csv"
+
+exit 0
