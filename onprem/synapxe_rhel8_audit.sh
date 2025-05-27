@@ -54,6 +54,9 @@ handle_error() {
 
 # After initial variable declarations, add hostname
 HOSTNAME=$(hostname -s)
+FQDN=$(hostname -f)
+OS_VERSION=$(cat /etc/redhat-release 2>/dev/null || echo "OS Version not found")
+KERNEL_VERSION=$(uname -r)
 
 # Secure results directory
 RESULT_DIR="/var/log/synapxe_audit"
@@ -194,6 +197,26 @@ generate_html_report() {
             border-radius: 8px 8px 0 0;
             margin-bottom: 20px;
         }
+        .server-info {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .server-info table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .server-info th, .server-info td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #456789;
+        }
+        .server-info th {
+            color: #bdc3c7;
+        }
         .summary-box {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
@@ -230,8 +253,29 @@ generate_html_report() {
     <div class="container">
         <div class="header">
             <h1>Synapxe RHEL 8 Audit Report</h1>
-            <h2>Server: SERVER_HOSTNAME</h2>
             <p>Generated on: TIMESTAMP</p>
+        </div>
+
+        <div class="server-info">
+            <h2>Server Information</h2>
+            <table>
+                <tr>
+                    <th>Hostname</th>
+                    <td>SERVER_HOSTNAME</td>
+                </tr>
+                <tr>
+                    <th>FQDN</th>
+                    <td>SERVER_FQDN</td>
+                </tr>
+                <tr>
+                    <th>OS Version</th>
+                    <td>OS_VERSION</td>
+                </tr>
+                <tr>
+                    <th>Kernel Version</th>
+                    <td>KERNEL_VERSION</td>
+                </tr>
+            </table>
         </div>
         
         <div class="summary-box">
@@ -252,6 +296,9 @@ EOF
 
     # Replace placeholders with actual values
     sed -i.bak "s/SERVER_HOSTNAME/$HOSTNAME/g" "$report_file"
+    sed -i.bak "s/SERVER_FQDN/$FQDN/g" "$report_file"
+    sed -i.bak "s|OS_VERSION|$OS_VERSION|g" "$report_file"
+    sed -i.bak "s/KERNEL_VERSION/$KERNEL_VERSION/g" "$report_file"
     sed -i.bak "s/TIMESTAMP/$timestamp/g" "$report_file"
     sed -i.bak "s/COMPLIANCE_RATE/$compliance_rate/g" "$report_file"
     sed -i.bak "s/TOTAL_TESTS/$total_tests/g" "$report_file"
