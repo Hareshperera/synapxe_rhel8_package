@@ -52,9 +52,12 @@ handle_error() {
 # Check for root privileges
 [ "$(id -u)" -eq 0 ] || handle_error "This script must be run as root"
 
+# After initial variable declarations, add hostname
+HOSTNAME=$(hostname -s)
+
 # Secure results directory
 RESULT_DIR="/var/log/synapxe_audit"
-RESULT_FILE="${RESULT_DIR}/synapxe_rhel8_audit_results.txt"
+RESULT_FILE="${RESULT_DIR}/synapxe_rhel8_audit_${HOSTNAME}_$(date +%Y%m%d_%H%M%S).txt"
 
 # Create secure results directory
 mkdir -p "${RESULT_DIR}" || handle_error "Failed to create results directory"
@@ -152,7 +155,7 @@ generate_html_report() {
     local passed_tests=$2
     local failed_tests=$3
     local compliance_rate=$4
-    local report_file="${RESULT_DIR}/synapxe_rhel8_audit_$(date +%Y%m%d_%H%M%S).html"
+    local report_file="${RESULT_DIR}/synapxe_rhel8_audit_${HOSTNAME}_$(date +%Y%m%d_%H%M%S).html"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     # Ensure directory exists
@@ -168,7 +171,7 @@ generate_html_report() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Synapxe RHEL 8 Audit Report</title>
+    <title>Synapxe RHEL 8 Audit Report - SERVER_HOSTNAME</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -227,6 +230,7 @@ generate_html_report() {
     <div class="container">
         <div class="header">
             <h1>Synapxe RHEL 8 Audit Report</h1>
+            <h2>Server: SERVER_HOSTNAME</h2>
             <p>Generated on: TIMESTAMP</p>
         </div>
         
@@ -247,6 +251,7 @@ generate_html_report() {
 EOF
 
     # Replace placeholders with actual values
+    sed -i.bak "s/SERVER_HOSTNAME/$HOSTNAME/g" "$report_file"
     sed -i.bak "s/TIMESTAMP/$timestamp/g" "$report_file"
     sed -i.bak "s/COMPLIANCE_RATE/$compliance_rate/g" "$report_file"
     sed -i.bak "s/TOTAL_TESTS/$total_tests/g" "$report_file"
