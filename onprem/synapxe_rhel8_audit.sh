@@ -152,11 +152,17 @@ generate_html_report() {
     local passed_tests=$2
     local failed_tests=$3
     local compliance_rate=$4
-    local report_file="${RESULT_FILE}.html"
+    local report_file="${RESULT_DIR}/synapxe_rhel8_audit_$(date +%Y%m%d_%H%M%S).html"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
-    # Create HTML report with proper escaping and formatting
-    cat > "$report_file" << EOF
+    # Ensure directory exists
+    mkdir -p "$(dirname "$report_file")" || handle_error "Failed to create HTML report directory" "ERROR"
+    
+    # Create HTML report with debug logging
+    log "Generating HTML report at: $report_file" "INFO"
+    
+    # Start HTML file
+    cat > "$report_file" << 'EOF' || handle_error "Failed to create HTML file" "ERROR"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -204,7 +210,6 @@ generate_html_report() {
             height: 100%;
             border-radius: 4px;
             transition: width 0.5s ease-in-out;
-            width: ${compliance_rate}%;
         }
         .section {
             margin: 20px 0;
@@ -216,73 +221,73 @@ generate_html_report() {
         .fail { color: #dc3545; }
         .info { color: #17a2b8; }
         .warning { color: #ffc107; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-        }
-        th, td {
-            padding: 12px;
-            border: 1px solid #dee2e6;
-            text-align: left;
-        }
-        th {
-            background: #f8f9fa;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Synapxe RHEL 8 Audit Report</h1>
-            <p>Generated on: ${timestamp}</p>
+            <p>Generated on: TIMESTAMP</p>
         </div>
         
         <div class="summary-box">
             <h2>Executive Summary</h2>
             <div class="progress-bar">
-                <div class="progress-fill"></div>
+                <div class="progress-fill" style="width: COMPLIANCE_RATE%;"></div>
             </div>
-            <p>Compliance Rate: ${compliance_rate}%</p>
+            <p>Compliance Rate: COMPLIANCE_RATE%</p>
             <table>
                 <tr><th>Metric</th><th>Count</th></tr>
-                <tr><td>Total Tests</td><td>${total_tests}</td></tr>
-                <tr><td>Passed Tests</td><td>${passed_tests}</td></tr>
-                <tr><td>Failed Tests</td><td>${failed_tests}</td></tr>
+                <tr><td>Total Tests</td><td>TOTAL_TESTS</td></tr>
+                <tr><td>Passed Tests</td><td>PASSED_TESTS</td></tr>
+                <tr><td>Failed Tests</td><td>FAILED_TESTS</td></tr>
             </table>
         </div>
-
         <div class="results">
 EOF
 
-    # Process the results file and add formatted content
+    # Replace placeholders with actual values
+    sed -i.bak "s/TIMESTAMP/$timestamp/g" "$report_file"
+    sed -i.bak "s/COMPLIANCE_RATE/$compliance_rate/g" "$report_file"
+    sed -i.bak "s/TOTAL_TESTS/$total_tests/g" "$report_file"
+    sed -i.bak "s/PASSED_TESTS/$passed_tests/g" "$report_file"
+    sed -i.bak "s/FAILED_TESTS/$failed_tests/g" "$report_file"
+    
+    # Add test results
     while IFS= read -r line; do
         if [[ $line == *"[PASS]"* ]]; then
-            echo "<p><span class=\"pass\">${line}</span></p>" >> "$report_file"
+            echo "<p class=\"pass\">$line</p>" >> "$report_file"
         elif [[ $line == *"[FAIL]"* ]]; then
-            echo "<p><span class=\"fail\">${line}</span></p>" >> "$report_file"
+            echo "<p class=\"fail\">$line</p>" >> "$report_file"
         elif [[ $line == *"[INFO]"* ]]; then
-            echo "<p><span class=\"info\">${line}</span></p>" >> "$report_file"
+            echo "<p class=\"info\">$line</p>" >> "$report_file"
         elif [[ $line == *"[WARNING]"* ]]; then
-            echo "<p><span class=\"warning\">${line}</span></p>" >> "$report_file"
+            echo "<p class=\"warning\">$line</p>" >> "$report_file"
         elif [[ $line == *"="* ]]; then
-            echo "<h3>${line}</h3>" >> "$report_file"
+            echo "<h3>$line</h3>" >> "$report_file"
         else
-            echo "<p>${line}</p>" >> "$report_file"
+            echo "<p>$line</p>" >> "$report_file"
         fi
     done < "$RESULT_FILE"
 
     # Close HTML document
-    cat >> "$report_file" << EOF
+    cat >> "$report_file" << 'EOF'
         </div>
     </div>
 </body>
 </html>
 EOF
 
-    # Set proper permissions
-    chmod 644 "$report_file"
-    log "HTML report generated: $report_file"
+    # Set proper permissions and check if file was created
+    if [ -f "$report_file" ]; then
+        chmod 644 "$report_file"
+        log "HTML report successfully generated: $report_file" "INFO"
+    else
+        handle_error "Failed to verify HTML report creation" "ERROR"
+    fi
+    
+    # Clean up backup files from sed
+    rm -f "${report_file}.bak"
 }
 
 log_section "1.1.1.x - Kernel Module Checks"
